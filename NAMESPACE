@@ -1,0 +1,5 @@
+S3method(rViewGraph,default)
+S3method(rViewGraph,Matrix)
+S3method(rViewGraph,igraph)
+export(rViewGraph)
+import(rJava)
