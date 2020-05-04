@@ -21,17 +21,17 @@ public class LocalLocator<V,E> extends GraphLocator<V,E>
 		double alpha = 2*d;
 		
 		Collection<V> vertices = new LinkedHashSet<V>(g.getVertices());
-		RadixPlaneSorter<Point> p = null;
+		RadixPlaneSorter<Coord> p = null;
 		if (alpha > Double.MIN_VALUE)
 		{
-			p = new RadixPlaneSorter<Point>(Math.sqrt(gamma),Math.sqrt(gamma),40);
+			p = new RadixPlaneSorter<Coord>(Math.sqrt(gamma),Math.sqrt(gamma),40);
 			for (V a : vertices)
-				p.add(g.getPoint(a));
+				p.add(g.getCoord(a));
 		}	
 			
 		for (V a : vertices)
 		{
-			Point pa = g.getPoint(a);
+			Coord pa = g.getCoord(a);
 			if (!pa.m)
 				continue;
 
@@ -43,7 +43,7 @@ public class LocalLocator<V,E> extends GraphLocator<V,E>
 				addDerivatives(D, localRepulsions(pa,p.getLocal(pa,Math.sqrt(gamma)),gamma), alpha);
 			}
 
-			addDerivatives(D, squaredAttractions(pa,g.getPoints(g.getNeighbours(a))), 1);
+			addDerivatives(D, squaredAttractions(pa,g.getCoords(g.getNeighbours(a))), 1);
 			delta += update(pa,D);
 
 			if (p != null)

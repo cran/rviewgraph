@@ -43,7 +43,7 @@ public class GraphAnimator<V,E> implements SafeRunnable
 		{
 			System.err.println("Caught in GraphAnimator.loop()");
 			e.printStackTrace();
-			System.exit(1);
+		//	System.exit(1);
 		}
 	}
 

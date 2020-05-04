@@ -37,6 +37,11 @@ public class Loop
 		return t.isRunning();
 	}
 
+	public Thread getThread()
+	{
+		return t;
+	}
+
 // Private data and methods and classes.
 
 	private SafeThread t = null;

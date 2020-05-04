@@ -93,33 +93,41 @@ public class ActiveCanvas extends BufferedCanvas
 		}
 		catch (ConcurrentModificationException e)
 		{
-			//System.err.println("Caught in ActiveCanvas:update()");
-			//e.printStackTrace();
+			System.err.println("Caught in ActiveCanvas:update()");
+			e.printStackTrace();
 		}
 	}
 
 	public void paint(Graphics g)
 	{
-		if (paper != null)
+		try 
 		{
-			g.setColor(Color.white);
-			g.fillRect(0,0,paper.getWidth(),paper.getHeight());
-			g.setColor(Color.black);
-			g.drawRect(0,0,paper.getWidth(),paper.getHeight());
-			
+			if (paper != null)
+			{
+				g.setColor(Color.white);
+				g.fillRect(0,0,paper.getWidth(),paper.getHeight());
+				g.setColor(Color.black);
+				g.drawRect(0,0,paper.getWidth(),paper.getHeight());
+				
+			}
+	
+			if (axes)
+			{
+				int bigint = 10000;
+				g.setColor(new Color(255,155,20));
+				g.drawLine(0,0,0,bigint);
+				g.drawLine(0,0,bigint,0);
+				g.drawLine(0,0,0,-bigint);
+				g.drawLine(0,0,-bigint,0);
+			}
+	
+			super.paint(g);
 		}
-
-		if (axes)
+		catch (ConcurrentModificationException e)
 		{
-			int bigint = 10000;
-			g.setColor(new Color(255,155,20));
-			g.drawLine(0,0,0,bigint);
-			g.drawLine(0,0,bigint,0);
-			g.drawLine(0,0,0,-bigint);
-			g.drawLine(0,0,-bigint,0);
+	//		System.err.println("Caught in ActiveCanvas:paint()");
+	//		e.printStackTrace();
 		}
-
-		super.paint(g);
 	}
 
 	public void plot(Graphics g)
@@ -149,9 +157,17 @@ public class ActiveCanvas extends BufferedCanvas
 
 // Protected methods.
 
-	protected void processMouseEvent(MouseEvent e)
+	protected void processMouseEvent(MouseEvent ev)
 	{
-		super.processMouseEvent(transformed(e));
+		try
+		{
+			super.processMouseEvent(transformed(ev));
+		}
+		catch (ConcurrentModificationException e)
+		{
+			System.err.println("Caught in ActiveCanvas:processMouseEvent()");
+			e.printStackTrace();
+		}
 	}
 
 	protected void processMouseMotionEvent(MouseEvent e)

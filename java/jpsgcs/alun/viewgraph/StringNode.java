@@ -29,6 +29,8 @@ public class StringNode implements VertexRepresentation
 		text = ctext;
 		border0 = cborder0;
 		border1 = cborder1;
+
+		diagcolor = background;
 		
 		shape = h;
 	}
@@ -41,6 +43,8 @@ public class StringNode implements VertexRepresentation
 		border0 = s.border0;
 		border1 = s.border1;
 		shape = s.shape;
+		diagcolor = s.diagcolor;
+		diag = s.diag;
 	}
 	
 	public void paint(Graphics g, double dx, double dy, boolean b)
@@ -75,7 +79,15 @@ public class StringNode implements VertexRepresentation
 			break;
 		}
 
+		if (diag > 0)
+		{
+			g.setColor(diagcolor);
+                        g.drawLine(x,y,x+2*w,y+2*w);
+                        g.drawLine(x+2*w,y,x,y+2*h);
+		}
+
 		g.setColor(text);
+
 		g.drawString(name,x-w+xfill,y-h+2*(h-yfill));
 	}
 	
@@ -93,10 +105,16 @@ public class StringNode implements VertexRepresentation
 		background = c;
 	}
 
+	public Color getColor()
+	{
+		return background;
+	}
+
 	public void setTextColor(Color c)
 	{
 		text = c;
 	}
+
 
 	public void setBorderColors(Color c, Color d)
 	{
@@ -107,6 +125,11 @@ public class StringNode implements VertexRepresentation
 	public void setShape(int h)
 	{
 		shape = h;
+	}
+
+	public int getShape()
+	{
+		return shape;
 	}
 
 	public void reverse()
@@ -127,22 +150,36 @@ public class StringNode implements VertexRepresentation
 		return h;
 	}
 
+	public void setDiagonals(int b)
+	{
+		diag = b;
+	}
+
+	public void setDiagonalColor(Color b)
+	{
+		diagcolor = b;
+	}
+	
 // Private data.
 
-	private String name = null;
-	private Color background = null;
-	private Color text = null;
-	private Color border0 = null;
-	private Color border1 = null;
+	protected String name = null;
+	protected Color background = null;
+	protected Color text = null;
+	protected Color border0 = null;
+	protected Color border1 = null;
 
-	private boolean mono = false;
+	protected Color diagcolor = null;
 
-	private int shape = 0;
-	private int w = 8;
-	private int h = 8;
-	private boolean sizeset = false;
-	private int xfill = 4;
-	private int yfill = 2;
+	protected boolean mono = false;
+
+	protected int diag = 0;
+
+	protected int shape = 0;
+	protected int w = 8;
+	protected int h = 8;
+	protected boolean sizeset = false;
+	protected int xfill = 4;
+	protected int yfill = 2;
 
 	private Color reverse(Color c)
 	{
@@ -152,7 +189,7 @@ public class StringNode implements VertexRepresentation
 		return new Color(r,g,b);
 	}
 
-	private void drawRect(Graphics g, int xx, int yy, int ww, int hh, boolean fill)
+	protected void drawRect(Graphics g, int xx, int yy, int ww, int hh, boolean fill)
 	{
 		int w = ww-1;
 		int h = hh-1;
@@ -165,7 +202,7 @@ public class StringNode implements VertexRepresentation
 			g.drawRect(x,y,2*w,2*h); 
 	}
 
-	private void drawOval(Graphics g, int xx, int yy, int ww, int hh, boolean fill)
+	protected void drawOval(Graphics g, int xx, int yy, int ww, int hh, boolean fill)
 	{
 		int w = ww;
 		int h = hh;
@@ -178,7 +215,7 @@ public class StringNode implements VertexRepresentation
 			g.drawOval(x,y,2*w,2*h); 
 	}
 
-	private void drawDiamond(Graphics g, int xx, int yy, int ww, int hh, boolean fill)
+	protected void drawDiamond(Graphics g, int xx, int yy, int ww, int hh, boolean fill)
 	{
 		int w = ww+2;
 		int h = hh+2;
@@ -195,7 +232,7 @@ public class StringNode implements VertexRepresentation
 			g.drawPolygon(p);
 	}
 
-	private void setSize(Graphics g)
+	protected void setSize(Graphics g)
 	{
 		w = xfill + g.getFontMetrics().stringWidth(name) / 2;
 		h = yfill + g.getFontMetrics().getHeight() / 2;

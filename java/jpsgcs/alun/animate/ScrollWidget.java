@@ -62,6 +62,17 @@ public class ScrollWidget extends Scrollbar implements AdjustmentListener
 		return getValue()*scale;
 	}
 
+	public void setRealValue(double v)
+	{
+		setValue((int)(v/scale));
+		adjustmentValueChanged(null);
+	}
+
+	public void setScale(double s)
+	{
+		scale = s;
+	}
+
 	private double scale = 0.001;
 	private TextField lab = null;
 	private Panel pan = null;

@@ -26,6 +26,8 @@ public class GraphPanel<V,E> extends Panel
 
 	public GraphPanel(PaintableGraph<V,E> g, GraphLocator<V,E> loc, Parameter[] extras, boolean running)
 	{
+		graph = g;
+
 		loc.set(g);
 
 		ann = new GraphAnimator<V,E>(g,loc);
@@ -46,14 +48,25 @@ public class GraphPanel<V,E> extends Panel
 		if (extras != null)
 			len += extras.length;
 
+		w = new ParameterScrollWidget[len];
+		int j = 0;
+
 		p.setLayout(new GridLayout(len,1));
 		
 		for (int i=0; i<par.length; i++)
-			p.add(new ParameterScrollWidget(par[i]).getPanel());
+		{
+			w[j] = new ParameterScrollWidget(par[i]);
+			p.add(w[j].getPanel());
+			j++;
+		}
 
 		if (extras != null)
 			for (int i=0; i<extras.length; i++)
-			p.add(new ParameterScrollWidget(extras[i]).getPanel());
+			{
+				w[j] = new ParameterScrollWidget(extras[i]);
+				p.add(w[j].getPanel());
+				j++;
+			}
 	
 		add(p,BorderLayout.SOUTH);
 	}
@@ -68,5 +81,17 @@ public class GraphPanel<V,E> extends Panel
 		return ann.getCanvas();
 	}
 
+	public ParameterScrollWidget[] getParameterScrollWidgets()
+	{
+		return w;
+	}
+
+	public PaintableGraph<V,E> getGraph()
+	{
+		return graph;
+	}
+
+	private PaintableGraph<V,E> graph = null;
+	private ParameterScrollWidget[] w = null;
 	private GraphAnimator<V,E> ann = null;
 }

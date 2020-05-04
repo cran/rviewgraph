@@ -3,7 +3,7 @@ package jpsgcs.alun.util;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 
-public class RadixPlaneSorter<E extends CartesianPoint>
+public class RadixPlaneSorter<E extends Point>
 {
 	public RadixPlaneSorter(double x, double y, int k)
 	{

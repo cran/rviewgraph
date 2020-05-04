@@ -1,8 +1,8 @@
 Package: rviewgraph
 Type: Package
 Title: Animated Graph Layout Viewer
-Version: 1.2
-Date: 2018-07-06
+Version: 1.3.0
+Date: 2020-04-16
 Author: Alun Thomas
 Maintainer: Alun Thomas <Alun.Thomas@utah.edu>
 Description: This is an 'R' interface to Alun Thomas's 'ViewGraph' 'Java' graph
@@ -15,20 +15,15 @@ Description: This is an 'R' interface to Alun Thomas's 'ViewGraph' 'Java' graph
     components. The coordinates can be read as an 'igraph' style layout 
     matrix at any time. The user can mess with the layout using a mouse, 
     preferably one with 3 buttons, and some keyed commands.
-    The 'Java' program 'ViewGraph' is contained in Alun Thomas's 'JPSGCS' 
-    collection of 'Java' programs for statistical genetics and computational 
-    statistics. The homepage for 'JPSGCS' is 
-    <http://www-genepi.med.utah.edu/~alun/software/index.html>.
-    The documentation page for 'ViewGraph' is at 
-    <http://www-genepi.med.utah.edu/~alun/software/docs/ViewGraph.html>.
 Suggests:
 Enhances: igraph, Matrix
 Depends: rJava
+SystemRequirements: 'Java' version >= 8
 License: GPL-2
 LazyLoad: yes
-Packaged: 2018-07-22 15:54:06 UTC; alun
+Packaged: 2020-05-04 18:46:52 UTC; alun
 Collate: 'onLoad.R' 'rViewGraph.R'
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.1
 NeedsCompilation: no
 Repository: CRAN
-Date/Publication: 2018-07-27 21:00:09 UTC
+Date/Publication: 2020-05-04 22:00:02 UTC

@@ -60,6 +60,14 @@ public abstract class GraphSkeleton<V,T>
 		b.clear();
 	}
 
+	public void clearEdges()
+	{
+		for (Map<V,T> n : f.values())
+			n.clear();
+		for (Map<V,T> n : b.values())
+			n.clear();
+	}
+
 	public boolean add(V x)
 	{
 		if (f.containsKey(x))
@@ -111,8 +119,8 @@ public abstract class GraphSkeleton<V,T>
 		for (V v : getVertices())
 		{
 			s.append(v+"\t");
-			for (V u : inNeighbours(v))
-			//for (V u : outNeighbours(v))
+			//for (V u : inNeighbours(v))
+			for (V u : outNeighbours(v))
 				s.append(u+" ");
 			s.append("\n");
 		}

@@ -1,6 +1,6 @@
 package jpsgcs.alun.viewgraph;
 
-import jpsgcs.alun.graph.Point;
+import jpsgcs.alun.graph.Coord;
 import jpsgcs.alun.animate.MouseKeyListener;
 import jpsgcs.alun.animate.Loop;
 import jpsgcs.alun.graph.Graphs;
@@ -24,16 +24,16 @@ public class GraphListener<V,E> extends MouseKeyListener
  		switch(e.getKeyCode())
 		{
 		case KeyEvent.VK_DOWN:
-			scale(a.getGraph().getPoints(), scaledown, scaledown);
+			scale(a.getGraph().getCoords(), scaledown, scaledown);
 			break;
 		case KeyEvent.VK_UP:
-			scale(a.getGraph().getPoints(), scaleup, scaleup);
+			scale(a.getGraph().getCoords(), scaleup, scaleup);
 			break;
 		case KeyEvent.VK_LEFT:
-			rotate(a.getGraph().getPoints(), -rotation);
+			rotate(a.getGraph().getCoords(), -rotation);
 			break;
 		case KeyEvent.VK_RIGHT:
-			rotate(a.getGraph().getPoints(), +rotation);
+			rotate(a.getGraph().getCoords(), +rotation);
 			break;
 		case KeyEvent.VK_DELETE:
 			a.getLoop().flip();
@@ -161,15 +161,15 @@ public class GraphListener<V,E> extends MouseKeyListener
 		case 2: if (v != null)
 			{
 				if (e.isShiftDown())
-					points = a.getGraph().getShownComponentPoints(v);
+					points = a.getGraph().getShownComponentCoords(v);
 				else
-					points = a.getGraph().getPoints(v);
+					points = a.getGraph().getCoords(v);
 				fix(points,false);
 			}
 			break;
 
 		case 3: if (e.isShiftDown())
-				points = a.getGraph().getShownPoints();
+				points = a.getGraph().getShownCoords();
 			break;
 		}
 	}
@@ -203,29 +203,29 @@ public class GraphListener<V,E> extends MouseKeyListener
 	private double rotation = Math.PI/12.0;
 	private double x = 0;
 	private double y = 0;
-	private Collection<Point> points = null;
+	private Collection<Coord> points = null;
 
-	private void shift(Collection<Point> c, double s, double t)
+	private void shift(Collection<Coord> c, double s, double t)
 	{
-		for (Point p : c)
+		for (Coord p : c)
 		{
 			p.x += s;
 			p.y += t;
 		}
 	}
 
-	private void scale(Collection<Point> c, double s, double t)
+	private void scale(Collection<Coord> c, double s, double t)
 	{
-		for (Point p : c)
+		for (Coord p : c)
 		{
 			p.x *= s;
 			p.y *= t;
 		}
 	}
 
-	private void rotate(Collection<Point> c, double s)
+	private void rotate(Collection<Coord> c, double s)
 	{
-		for (Point p : c)
+		for (Coord p : c)
 		{
 			double  r = Math.sqrt(p.x*p.x + p.y*p.y);
 			double t = Math.atan2(p.y,p.x);
@@ -235,9 +235,9 @@ public class GraphListener<V,E> extends MouseKeyListener
 		}
 	}
 
-	private void fix(Collection<Point> c, boolean b)
+	private void fix(Collection<Coord> c, boolean b)
 	{
-		for (Point p : c)
+		for (Coord p : c)
 		{
 			p.m = b;
 		}

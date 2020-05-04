@@ -14,18 +14,43 @@ abstract public class GraphLocator<V,E>
 
 	public void set(LocatedGraph<V,E> g)
 	{
-		for (Point p : g.getPoints())
+		double r = 100;
+		double dr = 1.0;
+
+		double n = g.getVertices().size();
+		double t = 0;
+		double dt =2* 2*Math.PI/n;
+
+		for (Coord p : g.getCoords())
 		{
-			p.x = Math.random()*1000 - 500 ;
-			p.y = Math.random()*1000 - 500 ;
+			p.x = randu()*1000 - 500 ;
+			p.y = randu()*1000 - 500 ;
+
+//			r += dr;
+//			t += dt;
+//			p.x = r*Math.cos(t);
+//			p.y = r*Math.sin(t);
 		}
 	}
 
 // Private data and methods.
 
 	protected Parameter[] par = null;
+	
+	// Don't want to use Math .random() and don't want
+	// to bother with passing down a Random object,
+	// and this will do to space out starting points
+	// for vertices. Yeah RANDU!
 
-	protected double update(Point a, Derivatives D)
+	private long seed = 1;
+
+	protected double randu()
+	{
+		seed = (seed * 65539) % 2147483648l;
+		return  seed/2147483648.0;
+	}
+	
+	protected double update(Coord a, Derivatives D)
 	{
 		double d2 = Math.abs(D.d2x + D.d2y);
 		if (d2 > Double.MIN_VALUE)
@@ -45,14 +70,14 @@ abstract public class GraphLocator<V,E>
 		D.d2y += s*E.d2y;
 	}
 
-	protected Derivatives squaredAttractions(Point a, Collection<Point> c)
+	protected Derivatives squaredAttractions(Coord a, Collection<Coord> c)
 	{
 		Derivatives D = new Derivatives();
 		double x = 0;
 		double y = 0;
 		double r = 0;
 
-		for (Point b : c)
+		for (Coord b : c)
 		{
 			if (b == a)
 				continue;
@@ -68,7 +93,7 @@ abstract public class GraphLocator<V,E>
 		return D;
 	}
 
-	protected Derivatives homePointAttraction(Point a, double s)
+	protected Derivatives homeCoordAttraction(Coord a, double s)
 	{
 		Derivatives D = new Derivatives();
 			
@@ -80,10 +105,10 @@ abstract public class GraphLocator<V,E>
 		return D;
 	}
 
-	protected Derivatives inverseSquareRepulsions(Point a, Collection<Point> c)
+	protected Derivatives inverseSquareRepulsions(Coord a, Collection<Coord> c)
 	{
 		Derivatives D = new Derivatives();
-		for (Point b : c)
+		for (Coord b : c)
 		{
 			if (b == a)
 				continue;
@@ -109,10 +134,10 @@ abstract public class GraphLocator<V,E>
 		return D;
 	}
 
-	protected Derivatives localRepulsions(Point a, Collection<Point> c, double gamma)
+	protected Derivatives localRepulsions(Coord a, Collection<Coord> c, double gamma)
 	{
 		Derivatives D = new Derivatives();
-		for (Point b : c)
+		for (Coord b : c)
 		{
 			if (b == a)
 				continue;
@@ -144,10 +169,10 @@ abstract public class GraphLocator<V,E>
 		return D;
 	}
 
-	protected Derivatives rootedLocalRepulsions(Point a, Collection<Point> c, double gamma)
+	protected Derivatives rootedLocalRepulsions(Coord a, Collection<Coord> c, double gamma)
 	{
 		Derivatives D = new Derivatives();
-		for (Point b : c)
+		for (Coord b : c)
 		{
 			if (b == a)
 				continue;
@@ -178,11 +203,11 @@ abstract public class GraphLocator<V,E>
 		return D;
 	}
 
-	protected Derivatives verticalGenerations(Point a, Collection<Point> c, double delta)
+	protected Derivatives verticalGenerations(Coord a, Collection<Coord> c, double delta)
 	{
 		Derivatives D = new Derivatives();
 
-		for (Point b : c)
+		for (Coord b : c)
 		{
 			if (b == a)
 				continue;

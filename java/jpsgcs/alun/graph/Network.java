@@ -1,11 +1,12 @@
 package jpsgcs.alun.graph;
 
+import jpsgcs.alun.hashing.LinkedIdentityHashMap;
+
 import java.util.Set;
 import java.util.Map;
 import java.util.Collections;
 import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.IdentityHashMap;
 import java.util.TreeMap;
 import java.util.LinkedHashSet;
 
@@ -48,8 +49,8 @@ public class Network<V,E> extends GraphSkeleton<V,E> implements MutableGraph<V,E
 
 		if (identity)
 		{
-			f = new IdentityHashMap<V,Map<V,E>>();
-			b = ( directed ? new IdentityHashMap<V,Map<V,E>>() : f );
+			f = new LinkedIdentityHashMap<V,Map<V,E>>();
+			b = ( directed ? new LinkedIdentityHashMap<V,Map<V,E>>() : f );
 		}
 		else if (sorted)
 		{
@@ -94,6 +95,13 @@ public class Network<V,E> extends GraphSkeleton<V,E> implements MutableGraph<V,E
 		return n;
 	}
 
+	public void disconnect(Object x)
+	{
+		Set<V> neighbs = new LinkedHashSet<V>(getNeighbours(x));
+		for (V v : neighbs)
+			disconnect(x,v);
+	}
+
 	public boolean connect(V x, V y, E e)
 	{
 		if (connection(x,y) != null && connection(x,y) == e)
@@ -126,6 +134,12 @@ public class Network<V,E> extends GraphSkeleton<V,E> implements MutableGraph<V,E
 		return true;
 	}
 
+	public boolean uniConnect(V x, V y)
+	{
+		disconnect(x);
+		return connect(x,y);
+	}
+
 	public E connection(Object x, Object y)
 	{
 		Map<V,E> n = f.get(x);
@@ -138,6 +152,11 @@ public class Network<V,E> extends GraphSkeleton<V,E> implements MutableGraph<V,E
 		return n == null ? null : Collections.unmodifiableCollection(n.values());
 	}
 
+	public Map<V,E> neighbourMap(Object x)
+	{
+		return f.get(x);
+	}
+
 //	Private data and methods.
 
 	private boolean directed = false;
@@ -147,7 +166,7 @@ public class Network<V,E> extends GraphSkeleton<V,E> implements MutableGraph<V,E
 	protected Map<V,E> makeMap()
 	{
 		if (identity)
-			return new IdentityHashMap<V,E>();
+			return new LinkedIdentityHashMap<V,E>();
 
 		if (sorted)
 			return new TreeMap<V,E>();

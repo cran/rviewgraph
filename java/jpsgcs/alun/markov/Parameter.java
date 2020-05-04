@@ -12,14 +12,15 @@ public class Parameter
 		value = df;
 		logvalue = Math.log(value);
 		logonemin = Math.log(1-value);
-		
+		changed = true;
+
 		changed = false;
 	}
 
-	public String name() { return name; }
-	public double def() { return def; }
-	public double max() { return max; }
-	public double min() { return min; }
+	public String toString()
+	{
+		return name+"\t"+value;
+	}
 
 	public void setValue(double v)
 	{
@@ -50,6 +51,33 @@ public class Parameter
 		changed = false;
 		return b;
 	}
+
+	public String name() 
+	{ 
+		return name; 
+	}
+
+	public double def() 
+	{ 
+		return def; 
+	}
+
+	public void setDefault(double d)
+	{
+		def = d;
+	}
+
+	public double max() 
+	{ 
+		return max; 
+	}
+
+	public double min() 
+	{ 
+		return min; 
+	}
+
+// Private data.
 
 	private String name = null;
 	private double max = 0;

@@ -3,7 +3,7 @@ package jpsgcs.alun.viewgraph;
 import jpsgcs.alun.graph.Graph;
 import jpsgcs.alun.graph.LocatedMaskedGraph;
 import jpsgcs.alun.animate.Paintable;
-import jpsgcs.alun.graph.Point;
+import jpsgcs.alun.graph.Coord;
 import java.util.Map;
 import java.util.LinkedHashMap;
 import java.awt.Graphics;
@@ -52,7 +52,7 @@ public class PaintableGraph<V,E> extends LocatedMaskedGraph<V,E> implements Pain
 	{
 		for (V v: getVertices())
 		{
-			Point pv = getPoint(v);
+			Coord pv = getCoord(v);
 			if (node.get(v).contains(pv.x - x, pv.y - y))
 				return v;
 		}
@@ -63,29 +63,52 @@ public class PaintableGraph<V,E> extends LocatedMaskedGraph<V,E> implements Pain
 	{
 		for (V v: getVertices())
 		{
-			Point pv = getPoint(v);
-			for (V u: outNeighbours(v))
+			Coord pv = getCoord(v);
+			if (pv.v)
 			{
-				Color col = Color.black;
-
-				E con = connection(v,u);
-				if (con instanceof Color)
-					col = (Color) con;
-
-				Point pu = getPoint(u);
-				if (arrows && isDirected())
-					arrow(g,pv.x,pv.y,pu.x,pu.y,col);
-				else
-					line(g,pv.x,pv.y,pu.x,pu.y,col);
+				for (V u: outNeighbours(v))
+				{
+					Coord pu = getCoord(u);
+					if (pu.v)
+					{
+						Color col = Color.black;
+						E con = connection(v,u);
+						if (con instanceof Color)
+							col = (Color) con;
+		
+						if (arrows && isDirected())
+							arrow(g,pv.x,pv.y,pu.x,pu.y,col);
+						else
+							line(g,pv.x,pv.y,pu.x,pu.y,col);
+					}
+				}
 			}
 		}
 
 		for (V v: getVertices())
 		{
-			Point pv = getPoint(v);
-			VertexRepresentation nv = node.get(v);
-			nv.paint(g,pv.x,pv.y, getNeighbours(v).containsAll(completeGraph().getNeighbours(v)));
+			Coord pv = getCoord(v);
+			if (pv.v)
+			{
+				VertexRepresentation nv = node.get(v);
+				nv.paint(g,pv.x,pv.y, getNeighbours(v).containsAll(completeGraph().getNeighbours(v)));
+			}
 		}
+	}
+
+	public Map<V,VertexRepresentation> getMap()
+	{
+		return node;
+	}
+	
+	public VertexRepresentation getRepresentation(V v)
+	{
+		return node.get(v);
+	}
+
+	public void setRepresentation(V v, VertexRepresentation r)
+	{
+		node.put(v,r);
 	}
 
 // Private data

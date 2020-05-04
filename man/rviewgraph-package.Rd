@@ -6,18 +6,19 @@
 \alias{rviewgraph}
 \title{Animated Graph Layout Viewer}
 \description{
-rviewgraph provides an R interface to Alun Thomas's 'ViewGraph' Java graph viewing program.
+rviewgraph provides an 'R' interface to Alun Thomas's 'ViewGraph' 'Java' graph viewing program.
 }
 \details{
 \tabular{ll}{
 Package: \tab rviewgraph\cr
 Type: \tab Package\cr
-Version: \tab 1.2\cr
-Date: \tab 2012-03-30\cr
+Version: \tab 1.3.0\cr
+Date: \tab 2020-04-16\cr
 License: \tab GPL-2 \cr
 LazyLoad: \tab yes\cr
+SystemRequirements: \tab 'Java' >= 8\cr
 }
-This package provides an R interface to Alun Thomas's 'ViewGraph' Java graph viewing program.
+This package provides an 'R' interface to Alun Thomas's 'ViewGraph' 'Java' graph viewing program.
 It takes a graph specified as an incidence matrix, array of edges, or in \code{igraph} format
 and runs a graphical user interface that shows an
 animation of a force directed algorithm positioning the vertices in two dimensions.
@@ -28,11 +29,6 @@ The user can mess with the layout using a mouse, preferably one with 3 buttons,
 and some keyed commands.
 
 The only function that the user needs to know about in this package is 
-rViewGraph(). It launches the GUI by delegating to specific functions depending
+\code{rViewGraph()}. It launches the GUI by delegating to specific functions depending
 on the class of the arguments.
-
-The Java program 'ViewGraph' is contained in Alun Thomas's 'JPSGCS' collection of java programs for
-statistical genetics and computational statistics. The
-homepage for 'JPSGCS' is <http://www-genepi.med.utah.edu/~alun/software/index.html>. 
-The documentation page for 'ViewGraph' is at <http://www-genepi.med.utah.edu/~alun/software/docs/ViewGraph.html>.
 }

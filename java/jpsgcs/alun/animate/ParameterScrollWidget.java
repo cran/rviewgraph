@@ -19,5 +19,16 @@ public class ParameterScrollWidget extends ScrollWidget
 			par.setValue(getRealValue());
 	} 
 
+	public Parameter getParameter()
+	{
+		return par;
+	}
+
+	public void setParameterValue(double t)
+	{
+		setRealValue(t);
+		par.setValue(t);
+	}
+
 	private Parameter par = null;
 }

@@ -5,7 +5,7 @@
 \alias{rViewGraph.default}
 \alias{rViewGraph.Matrix}
 \alias{rViewGraph.igraph}
-\title{This is a function to create and start the Java graph animation GUI.}
+\title{This is a function to create and start the 'Java' graph animation GUI.}
 \source{
 A full description of the force function and algorithm used 
 is given by
@@ -28,15 +28,15 @@ rViewGraph(object, names, layout, directed, running, ...)
   directed = igraph::is.directed(object), running = TRUE, ...)
 }
 \arguments{
-\item{object}{Object to plot graph for}
+\item{object}{the object specifying the graph}
 
-\item{names}{names of the nodes}
+\item{names}{the names of the nodes}
 
-\item{layout}{layout to start}
+\item{layout}{the starting positions of the vertices}
 
-\item{directed}{is the graph directed or not}
+\item{directed}{indicates whether or not the graph is directed}
 
-\item{running}{run the graph}
+\item{running}{indicates whether or not to start with animation running}
 
 \item{...}{passed along extra arguments.}
 }
@@ -53,7 +53,7 @@ the viewer. None of the functions in the list take an argument.
 Creates and starts an animated GUI for positioning the vertices of a graph in 2 dimensions.
 }
 \details{
-Creates and starts a Java GUI showing a real time animation of a Newton-Raphson
+Creates and starts a 'Java' GUI showing a real time animation of a Newton-Raphson
 optimization of a force function specified between the vertices of an arbitrary graph.
 There are attractive forces between 
 adjacent vertices and repulsive forces between all vertices.
@@ -64,9 +64,66 @@ This is a generic function that delegates its work to specific functions dependi
 the class of the first argument. It can handle an incidence matrix, a list of 
 edges, and an \code{igraph} graph object.
 
-Full information about mouse and key operations for manipulating the graph are given on
-the documentation page for the Java version of 'ViewGraph' at 
-<http://www-genepi.med.utah.edu/~alun/software/docs/ViewGraph.html>.
+The program is controlled by a slide bar, some buttons, the arrow, home and
+shift keys, but mostly by mouse operations. All three mouse buttons are used.
+
+\itemize{
+\item The slide bar at the bottom controls the repulsive force in the energy
+equation used to set the coordinates.
+
+\item Mouse operations without shift key and without control key pressed.
+\enumerate{
+\item Left mouse: Drags a vertex. Vertex is free on release. 
+\item Middle mouse: Drags a vertex. Vertex is fixed at release position. 
+\item Right mouse: Translates the view by the amount dragged. A bit like putting
+your finger on a piece of paper and moving it. 
+\item Double click with any mouse button in the background: 
+Resets the vertices to new random positions. 
+}
+
+\item Mouse operations with shift key but without control key pressed.
+\enumerate{
+\item Left mouse: Drags a vertex and the component it is in. 
+Vertex and component free on release.
+\item Middle mouse: Drags a vertex and the component it is in. 
+Vertex and component are fixed at release positions.
+\item Right mouse: Translates the positions of the vertices relative to 
+the position of the canvas by the amount dragged. This is useful to center 
+the picture on the canvas ready for outputting.
+}
+
+\item Mouse operations without shift key but with control key pressed.
+\enumerate{
+\item Left mouse: Click on a vertex to un-delete any deleted neighbours.
+\item Middle mouse: Click on a vertex to delete it from the graph.
+\item Double click left mouse: Replaces all deleted vertices in the graph.
+\item Double click middle mouse: Deletes all vertices from the graph.
+}
+
+\item Mouse operations with shift key and with control key pressed.
+\enumerate{
+\item Left mouse: Click on a vertex to replace all vertices in the same component to the graph.
+\item Middle mouse: Click on a vertex to delete it and the component it is in from the graph.
+}
+
+\item Key functions without shift key pressed. Mouse has to be in the picture canvas.
+\enumerate{
+\item Up arrow: Increases the scale of viewing by 10\%.
+\item Down arrow: Decreases the scale of viewing by 10\%.
+\item Left arrow: Rotates the view by 15 degrees clockwise.
+\item Right arrow: Rotates the view by 15 degrees anticlockwise.
+\item Home key: Undoes all scalings and rotations and places the origin at
+the center of the picture canvas.
+}
+
+\item Key functions with shift key pressed. Mouse has to be in the picture canvas.
+\enumerate{
+\item Up arrow: Increases the vertex positions by 10\% relative to the scale of the canvas.
+\item Down arrow: Decreases the vertex positions by 10\% relative to the scale of the canvas.
+\item Left arrow: Rotates the vertex positions by 15 degrees clockwise relative to the canvas orientation.
+\item Right arrow: Rotates the vertex positions by 15 degrees anticlockwise relative to the canvas orientation.
+}
+}
 }
 \examples{
 # 

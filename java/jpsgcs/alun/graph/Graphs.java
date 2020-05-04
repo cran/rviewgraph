@@ -1,7 +1,15 @@
 package jpsgcs.alun.graph;
 
+import jpsgcs.alun.jtree.Clique;
+import jpsgcs.alun.jtree.JTrees;
+import jpsgcs.alun.util.Pair;
+
+import java.util.Random;
 import java.util.Set;
 import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.List;
+import java.util.List;
 import java.util.LinkedHashMap;
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -13,11 +21,202 @@ import java.io.IOException;
 
 /**
 	A class containing static methods for basic graph manipulations. 
-	Analagous to the the Collections class that manipulates a Collecction.
+	Analagous to the the Collections class that manipulates a Collection.
 */
 
 public class Graphs
 {
+	static public <V,E> Set<Set<V>> getCliques(Graph<V,E> g)
+	{
+		return getCliques(g,0,50,g.getVertices().size()+1);
+	}
+
+	static public <V,E> Set<Set<V>> getCliques(Graph<V,E> g, int max)
+	{
+		return getCliques(g,0,50,max);
+	}
+	
+	static public <V,E> Set<Set<V>> getCliques(Graph<V,E> g, int opt, int redo)
+	{
+		return getCliques(g,opt,redo,g.getVertices().size()+1);
+	}
+
+	static public <V,E> Set<Set<V>> getCliques(Graph<V,E> g, int opt, int redo, int max)
+	{
+		if (JTrees.isTriangulated(g))
+		{
+			return triangulatedcliques(g,max);
+		}
+
+		Network<V,E> h = new Network<V,E>();
+		for (V x : g.getVertices())
+		{
+			h.add(x);
+			for (V y : g.getNeighbours(x))
+				h.connect(x,y);
+		}
+
+		triangulate(h);
+
+		PriorityQueue<Set<V>> queue = new PriorityQueue<Set<V>>(11,new BiggestSet());
+
+		Set<Set<V>> tcliques = triangulatedcliques(h,max);
+
+		for (Set<V> c : tcliques)
+		{
+			Network<V,E> k = new Network<V,E>();
+			for (V x : c)
+			{
+				k.add(x);
+				for (V y : c)
+					if (x != y && g.connects(x,y))
+						k.connect(x,y);
+			}
+
+			if (JTrees.isTriangulated(k))
+			{
+				queue.addAll(triangulatedcliques(k,max));
+			}
+			else
+			{
+				if (k.getVertices().size() > 10 && opt < redo)
+				{
+					queue.addAll(getCliques(k,opt+1,redo));
+				}
+				else
+				{
+					queue.addAll(bruteforcecliques(k,max));
+				}
+			}
+		}
+
+		Set<Set<V>> output = new LinkedHashSet<Set<V>>();
+		while (!queue.isEmpty())
+		{
+			Set<V> x = queue.poll();
+			boolean ok = true;
+			for (Set<V> y : output)
+				if (y.containsAll(x))
+				{
+					ok = false;
+					break;
+				}
+			if (ok)
+				output.add(x);
+		}
+
+		return output;
+	}
+
+	static public <V,E> Set<Set<V>> triangulatedcliques(Graph<V,E> g, int max)
+	{
+		Set<Set<V>> res = new LinkedHashSet<Set<V>>();
+		for (Set<V> c : triangulatedcliques(g))
+			if (c.size() <= max)
+				res.add(c);
+		return res;
+	}
+
+	static public <V,E> Set<Set<V>> triangulatedcliques(Graph<V,E> g)
+	{
+		DecomposableGraphJT<V,E> d = new DecomposableGraphJT<V,E>();
+		for (V x : g.getVertices())
+			d.add(x);
+		List<Pair<V,V>> e = JTrees.edgeRecomposition(g);
+		if (e == null)
+			System.err.println("Not decomposable");
+		for (Pair<V,V> p : e)
+			if (!d.connect(p.x,p.y))
+				System.err.println("Can't connect\t"+p.x+"\t"+p.y);
+		return d.getCliques();
+	}
+
+	static public <V,E> Set<Set<V>> bruteforcecliques(Graph<V,E> g)
+	{
+		return bruteforcecliques(g,g.getVertices().size()+1);
+	}
+
+	static public <V,E> Set<Set<V>> bruteforcecliques(Graph<V,E> g, int max)
+	{
+		Set<Set<V>> C = new LinkedHashSet<Set<V>>();
+
+		V[] v = (V[]) g.getVertices().toArray();
+
+		if (v.length == 0)
+			return C;
+
+		int[] u = new int[v.length];
+		for (int i=0; i<u.length; i++)
+			u[i] = 2;
+
+		Set<V>[] x = (Set<V>[]) new Set[u.length+1];
+		for (int i=0; i<x.length; i++)
+			x[i] = new LinkedHashSet<V>();
+
+		for (int i=0; i>=0; )
+		{
+			if (u[i]-- == 0)
+			{
+				u[i] = 2;
+				i--;
+			}
+			else
+			{
+				x[i+1].clear();
+				x[i+1].addAll(x[i]);
+
+				if (u[i] == 1)
+				{
+					boolean ok = true;
+					for (V vv : x[i])
+					{
+						if (!g.connects(vv,v[i]))
+						{
+							ok = false;
+							break;
+						}
+					}
+	
+					if (!ok)
+						continue;
+	
+					x[i+1].add(v[i]);
+				}
+
+				if (x[i+1].size() > max)
+					continue;
+
+				if (++i == u.length)
+				{
+					boolean ok = true;
+					for (Set<V> c : C)
+					{
+						if (c.containsAll(x[i]))
+						{
+							ok = false;
+							break;
+						}
+					}
+
+					if (ok)
+						C.add(new LinkedHashSet<V>(x[i]));
+
+					i--;
+				}
+			}
+		}
+
+		return C;
+	}
+
+	static public Network<Integer,Object> integerGraph(int n)
+	{
+		Network<Integer,Object> g = new Network<Integer,Object>();
+		for (int i=0; i<n; i++)
+			g.add(new Integer(i));
+		return g;
+	}
+
 	static public <V,E> boolean equal(Graph<V,E> g, Graph<V,E> h)
 	{
 		if (g.isDirected() != h.isDirected())
@@ -28,16 +227,18 @@ public class Graphs
 
 		for (V v : g.getVertices())
 		{
-/*
-			if (!g.inNeighbours(v).equals(h.inNeighbours(v)))
-				return false;
-			if (!g.isDirected())
-				break;
-			if (!g.outNeighbours(v).equals(h.outNeighbours(v)))
-				return false;
-*/
-			if (!g.getNeighbours(v).equals(h.getNeighbours(v)))
-				return false;
+			if (g.isDirected())
+			{
+				if (!g.inNeighbours(v).equals(h.inNeighbours(v)))
+					return false;
+				if (!g.outNeighbours(v).equals(h.outNeighbours(v)))
+					return false;
+			}
+			else
+			{
+				if (!g.getNeighbours(v).equals(h.getNeighbours(v)))
+					return false;
+			}
 		}
 
 		return true;
@@ -58,18 +259,25 @@ public class Graphs
 		return (a+b)/2;
 	}
 
-	static public <V,E> void triangulate(MutableGraph<V,E> g)
+	static public <V,E> List<V> triangulate(MutableGraph<V,E> g)
 	{
-		triangulate(g, new LinkedHashSet<V>());
+		Set<V> peel = new LinkedHashSet<V>(g.getVertices());
+		return triangulate(g,peel);
 	}
 
 /**
  	Triangulates a graph using greedy algorithm for minimum fill ins.
 */
-	static public <V,E> void triangulate(MutableGraph<V,E> g, Collection<V> keep)
+	static public <V,E> List<V> triangulateTo(MutableGraph<V,E> g, Collection<V> keep)
 	{
 		Set<V> peel = new LinkedHashSet<V>(g.getVertices());
 		peel.removeAll(keep);
+		return triangulate(g,peel);
+	}
+
+	static public <V,E> List<V> triangulate(MutableGraph<V,E> g, Collection<V> peel)
+	{
+		List<V> sequence = new ArrayList<V>();
 
 		Network<V,E> h = new Network<V,E>();
 		for (V v : g.getVertices())
@@ -79,6 +287,7 @@ public class Graphs
 				h.connect(u,v);
 		}
 
+		
 		while (!peel.isEmpty())
 		{
 			V v = null;
@@ -111,58 +320,10 @@ public class Graphs
 	
 			h.remove(v);
 			peel.remove(v);
+			sequence.add(v);
 		}
-/*
-		while (!peel.isEmpty())
-		{
-			V v = null;
-			double best = Double.MAX_VALUE;
-			
-			Set<V> done = new LinkedHashSet<V>();
 
-			for (V u : peel)
-			{
-				double c = cost(h,u);
-				if (c == 0)
-				{
-					//v = u;
-					done.add(u);
-				}
-				else if (c < best)
-				{
-					v = u;
-					best = c;
-				}
-			}
-
-			if (!done.isEmpty())
-			{
-				for (V x : done)
-				{
-					h.remove(x);
-					peel.remove(x);
-				}
-			}
-			else
-			{
-				if (v == null)
-					continue;
-
-				for (V u : h.getNeighbours(v))
-					if (u != v)
-						for (V w : h.getNeighbours(v))
-							if (w != v)
-								if (u != w && !h.connects(u,w))
-								{
-									h.connect(u,w);
-									g.connect(u,w);
-								}
-	
-				h.remove(v);
-				peel.remove(v);
-			}
-		}
-*/
+		return sequence;
 	}
 
 	static private <V,E> double cost(Graph<V,E> g, V v)
@@ -177,9 +338,9 @@ public class Graphs
 	}
 	
 /** 
-	Returns that sub component of g that contains v.
+	Returns the set of vertices in the same sub component of g that contains v.
 */
-	static public <V,E> Collection<V> component(Graph<V,E> g, V v)
+	static public <V,E> Set<V> component(Graph<V,E> g, V v)
 	{
 		if (!g.contains(v))
 			return null;
@@ -198,6 +359,22 @@ public class Graphs
 				}
 		
 		return s;
+	}
+
+	static public <V,E> Set<Set<V>> components(Graph<V,E> g)
+	{
+		Set<V> s = new LinkedHashSet<V>(g.getVertices());
+		Set<Set<V>> c = new LinkedHashSet<Set<V>>();
+
+		while (!s.isEmpty())
+		{
+			V v = s.iterator().next();
+			Set<V> comp = component(g,v);
+			c.add(comp);
+			s.removeAll(comp);
+		}
+
+		return c;
 	}
 
 /**
@@ -222,6 +399,11 @@ public class Graphs
 		return read(new BufferedReader(new InputStreamReader(System.in)));
 	}
 	
+	static public Network<String,Object> read(boolean directed) throws IOException
+	{
+		return read(new BufferedReader(new InputStreamReader(System.in)),directed);
+	}
+	
 /**
 	Reads a graph from the given BufferedReader.
 	The input is interpreted as an adjacency list. The first String on each line
@@ -229,9 +411,19 @@ public class Graphs
 */
 	static public Network<String,Object> read(BufferedReader b) throws IOException
 	{
+		return read(b,false,false);
+	}
+		
+	static public Network<String,Object> read(BufferedReader b, boolean direct) throws IOException
+	{
+		return read(b,direct,false);
+	}
+
+	static public Network<String,Object> read(BufferedReader b, boolean direct, boolean ident) throws IOException
+	{
 		Map<String,String> map = new LinkedHashMap<String,String>();
 
-		Network<String,Object> g = new Network<String,Object>();
+		Network<String,Object> g = new Network<String,Object>(direct,ident);
 		for (String s = b.readLine(); s != null; s = b.readLine())
 		{
 			StringTokenizer t = new StringTokenizer(s);
@@ -243,6 +435,7 @@ public class Graphs
 				{
 					String u = standard(t.nextToken(),map);
 					g.connect(v,u);
+					//g.connect(u,v);
 				}
 			}
 		}
@@ -334,35 +527,6 @@ public class Graphs
 	static public <V,E> Set<V> breadthFirstSearch(Graph<V,E> g, V v)
 	{
 		return breadthFirstSearch(g,v,-1);
-/*
-		Set<V> out = new LinkedHashSet<V>();
-
-		if (!g.contains(v))
-			return out;
-
-		LinkedHashSet<V> todo = new LinkedHashSet<V>();
-		todo.add(v);
-
-		while (!todo.isEmpty())
-		{
-			V x = todo.iterator().next();
-			todo.remove(x);
-			out.add(x);
-
-			for (V y : g.getNeighbours(x))
-			{
-				if (out.contains(y))
-					continue;
-
-				if (todo.contains(y))
-					continue;
-
-				todo.add(y);
-			}
-		}
-
-		return out;
-*/
 	}
 
 /**

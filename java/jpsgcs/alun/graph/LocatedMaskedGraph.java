@@ -15,53 +15,53 @@ public class LocatedMaskedGraph<V,E> implements MaskedGraph<V,E>, LocatedGraph<V
 		show = new LinkedHashSet<V>();
 		hide = new LinkedHashSet<V>();
 
-		point = new LinkedHashMap<V,Point>();
+		point = new LinkedHashMap<V,Coord>();
 		for (V v : g.getVertices())
 		{
 			show.add(v);
-			point.put(v,new Point());
+			point.put(v, ( v instanceof Coord ? (Coord) v : new Coord() ) );
 		}
 	}
 
-	public Collection<Point> getPoints(V v)
+	public Collection<Coord> getCoords(V v)
 	{
-		Set<Point> s = new LinkedHashSet<Point>();
+		Set<Coord> s = new LinkedHashSet<Coord>();
 		s.add(point.get(v));
 		return s;
 	}
 
-	public Collection<Point> getPoints(Collection<V> c)
+	public Collection<Coord> getCoords(Collection<V> c)
 	{
-		Set<Point> s = new LinkedHashSet<Point>();
+		Set<Coord> s = new LinkedHashSet<Coord>();
 		for (V v : c)
 			s.add(point.get(v));
 		return s;
 	}
 
-	public Collection<Point> getPoints()
+	public Collection<Coord> getCoords()
 	{
 		return point.values();
 	}
 
-	public Collection<Point> getShownPoints()
+	public Collection<Coord> getShownCoords()
 	{
-		Set<Point> s = new LinkedHashSet<Point>();
+		Set<Coord> s = new LinkedHashSet<Coord>();
 		for (V v : show)
 			s.add(point.get(v));
 		return s;
 	}
 
-	public Collection<Point> getComponentPoints(V v)
+	public Collection<Coord> getComponentCoords(V v)
 	{
-		Set<Point> s = new LinkedHashSet<Point>();
+		Set<Coord> s = new LinkedHashSet<Coord>();
 		for (V u : Graphs.component(completeGraph(),v))
 			s.add(point.get(u));
 		return s;
 	}
 
-	public Collection<Point> getShownComponentPoints(V v)
+	public Collection<Coord> getShownComponentCoords(V v)
 	{
-		Set<Point> s = new LinkedHashSet<Point>();
+		Set<Coord> s = new LinkedHashSet<Coord>();
 		for (V u : Graphs.component(this,v))
 			s.add(point.get(u));
 		return s;
@@ -75,7 +75,7 @@ public class LocatedMaskedGraph<V,E> implements MaskedGraph<V,E>, LocatedGraph<V
 		double dd = Double.MAX_VALUE;
 		for (V v : getVertices())
 		{
-			Point p = point.get(v);
+			Coord p = point.get(v);
 			double d = (x-p.x)*(x-p.x) + (y-p.y)*(y-p.y);
 			if (d < dd)
 			{
@@ -86,7 +86,7 @@ public class LocatedMaskedGraph<V,E> implements MaskedGraph<V,E>, LocatedGraph<V
 		return u;
 	}
 
-	public Point getPoint(V v)
+	public Coord getCoord(V v)
 	{
 		return point.get(v);
 	}
@@ -188,5 +188,5 @@ public class LocatedMaskedGraph<V,E> implements MaskedGraph<V,E>, LocatedGraph<V
 	private Graph<V,E> g = null;
 	private Set<V> show = null;
 	private Set<V> hide = null;
-	private Map<V,Point> point = null;
+	private Map<V,Coord> point = null;
 }

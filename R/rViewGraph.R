@@ -9,10 +9,11 @@
 #' \tabular{ll}{
 #' Package: \tab rviewgraph\cr
 #' Type: \tab Package\cr
-#' Version: \tab 1.2\cr
-#' Date: \tab 2012-03-30\cr
+#' Version: \tab 1.3.0\cr
+#' Date: \tab 2020-04-16\cr
 #' License: \tab GPL-2 \cr
 #' LazyLoad: \tab yes\cr
+#' SystemRequirements: \tab 'Java' >= 8\cr
 #' }
 #' This package provides an 'R' interface to Alun Thomas's 'ViewGraph' 'Java' graph viewing program.
 #' It takes a graph specified as an incidence matrix, array of edges, or in \code{igraph} format
@@ -28,10 +29,6 @@
 #' \code{rViewGraph()}. It launches the GUI by delegating to specific functions depending
 #' on the class of the arguments.
 #'
-#' The 'Java' program 'ViewGraph' is contained in Alun Thomas's 'JPSGCS' collection of 'Java' programs for
-#' statistical genetics and computational statistics. The
-#' homepage for 'JPSGCS' is <http://www-genepi.med.utah.edu/~alun/software/index.html>. 
-#' The documentation page for 'ViewGraph' is at <http://www-genepi.med.utah.edu/~alun/software/docs/ViewGraph.html>.
 #' 
 NULL
 
@@ -39,11 +36,11 @@ NULL
 #' 
 #' Creates and starts an animated GUI for positioning the vertices of a graph in 2 dimensions.
 #' 
-#' @param object Object to plot graph for
-#' @param names names of the nodes
-#' @param layout layout to start
-#' @param directed is the graph directed or not
-#' @param running run the graph
+#' @param object the object specifying the graph
+#' @param names the names of the nodes
+#' @param layout the starting positions of the vertices
+#' @param directed indicates whether or not the graph is directed
+#' @param running indicates whether or not to start with animation running
 #' @param ...  passed along extra arguments.
 #' 
 #' @author Alun Thomas
@@ -59,10 +56,67 @@ NULL
 #' the class of the first argument. It can handle an incidence matrix, a list of 
 #' edges, and an \code{igraph} graph object.
 #' 
-#' Full information about mouse and key operations for manipulating the graph are given on
-#' the documentation page for the 'Java' version of 'ViewGraph' at 
-#' <http://www-genepi.med.utah.edu/~alun/software/docs/ViewGraph.html>.
+#' The program is controlled by a slide bar, some buttons, the arrow, home and
+#' shift keys, but mostly by mouse operations. All three mouse buttons are used.
 #' 
+#' \itemize{
+#' \item The slide bar at the bottom controls the repulsive force in the energy
+#' equation used to set the coordinates.
+#'
+#' \item Mouse operations without shift key and without control key pressed.
+#' \enumerate{
+#' \item Left mouse: Drags a vertex. Vertex is free on release. 
+#' \item Middle mouse: Drags a vertex. Vertex is fixed at release position. 
+#' \item Right mouse: Translates the view by the amount dragged. A bit like putting
+#' your finger on a piece of paper and moving it. 
+#' \item Double click with any mouse button in the background: 
+#' Resets the vertices to new random positions. 
+#' }
+#'
+#' \item Mouse operations with shift key but without control key pressed.
+#' \enumerate{
+#' \item Left mouse: Drags a vertex and the component it is in. 
+#' Vertex and component free on release.
+#' \item Middle mouse: Drags a vertex and the component it is in. 
+#' Vertex and component are fixed at release positions.
+#' \item Right mouse: Translates the positions of the vertices relative to 
+#' the position of the canvas by the amount dragged. This is useful to center 
+#' the picture on the canvas ready for outputting.
+#' }
+#'
+#' \item Mouse operations without shift key but with control key pressed.
+#' \enumerate{
+#' \item Left mouse: Click on a vertex to un-delete any deleted neighbours.
+#' \item Middle mouse: Click on a vertex to delete it from the graph.
+#' \item Double click left mouse: Replaces all deleted vertices in the graph.
+#' \item Double click middle mouse: Deletes all vertices from the graph.
+#' }
+#'
+#' \item Mouse operations with shift key and with control key pressed.
+#' \enumerate{
+#' \item Left mouse: Click on a vertex to replace all vertices in the same component to the graph.
+#' \item Middle mouse: Click on a vertex to delete it and the component it is in from the graph.
+#' }
+#'
+#' \item Key functions without shift key pressed. Mouse has to be in the picture canvas.
+#' \enumerate{
+#' \item Up arrow: Increases the scale of viewing by 10\%.
+#' \item Down arrow: Decreases the scale of viewing by 10\%.
+#' \item Left arrow: Rotates the view by 15 degrees clockwise.
+#' \item Right arrow: Rotates the view by 15 degrees anticlockwise.
+#' \item Home key: Undoes all scalings and rotations and places the origin at
+#' the center of the picture canvas.
+#' }
+#'
+#' \item Key functions with shift key pressed. Mouse has to be in the picture canvas.
+#' \enumerate{
+#' \item Up arrow: Increases the vertex positions by 10\% relative to the scale of the canvas.
+#' \item Down arrow: Decreases the vertex positions by 10\% relative to the scale of the canvas.
+#' \item Left arrow: Rotates the vertex positions by 15 degrees clockwise relative to the canvas orientation.
+#' \item Right arrow: Rotates the vertex positions by 15 degrees anticlockwise relative to the canvas orientation.
+#' }
+#' }
+#'
 #' @return
 #' All versions of \code{rViewGraph} return a list of functions that control the actions of 
 #' the viewer. None of the functions in the list take an argument.
@@ -102,10 +156,27 @@ rViewGraph <- function (object, names, layout, directed, running, ...)
 rViewGraphCore <- function (from, to, names=seq(max(from,to)), layout=NULL, directed=FALSE, running=TRUE) 
 	# Expects from and to to be 0 based arrays.
 {
+	if (!interactive())
+	{
+		print("rViewGraph only runs in interactive mode")
+		return
+	}
+
+	.jinit()
+
+	jv <- .jcall("java/lang/System", "S", "getProperty", "java.runtime.version")
+
+	if (substr(jv, 1L, 2L) == "1.") 
+	{
+  		jvn <- as.numeric(paste0(strsplit(jv, "[.]")[[1L]][1:2], collapse = "."))
+  		if (jvn < 1.8) 
+			stop("Java >= 8 is needed for this package but not available")
+	}
+
 	n <- length(names)
 
-	stopifnot(all(0 <= from && from < n) && all(0 <= to && to < n))
-    
+	stopifnot(all(0 <= from) && all(from < n) && all(0 <= to) && all(to < n))
+
     # default layout is random in a square
 	if (is.null(layout))
 		layout <- matrix(100*stats::runif(2 * n), ncol = 2)
@@ -178,7 +249,7 @@ rViewGraph.default <- function(object, names=seq(max(object)), layout=NULL, dire
 {
     	if(length(dim(object)) < 2 || dim(object)[2] != 2)
 	{
-      		message("Reformating the object as a 2 column array.")
+      		message("Reformatting the object as a 2 column array.")
       		object = matrix(object, ncol = 2) 
     	}
 
