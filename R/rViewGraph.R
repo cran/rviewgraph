@@ -9,8 +9,8 @@
 #' \tabular{ll}{
 #' Package: \tab rviewgraph\cr
 #' Type: \tab Package\cr
-#' Version: \tab 1.3.0\cr
-#' Date: \tab 2020-04-16\cr
+#' Version: \tab 1.3.1\cr
+#' Date: \tab 2020-05-06\cr
 #' License: \tab GPL-2 \cr
 #' LazyLoad: \tab yes\cr
 #' SystemRequirements: \tab 'Java' >= 8\cr
@@ -118,8 +118,10 @@ NULL
 #' }
 #'
 #' @return
-#' All versions of \code{rViewGraph} return a list of functions that control the actions of 
-#' the viewer. None of the functions in the list take an argument.
+#' \code{rViewGraph} is intended only for interactive use. When used in a non-interactive envirionment
+#' it immediately exists returning the value \code{NULL}.
+#' Otherwise, all versions of \code{rViewGraph} return a list of functions that control the actions of 
+#' the interactive viewer. None of the functions in the list take an argument.
 #' \item{run()}{Starts the GUI running if it's not already doing so.}
 #' \item{stop()}{Stops the GUI running if it's running.}
 #' \item{hide()}{Stops the GUI and hides it.}
@@ -134,8 +136,8 @@ NULL
 #' Genetics. Third Edition, pages 781-805. John Wiley & Sons, Ltd, 2007.
 #' 
 #' @examples
-#' # 
-#' # Viewing an Erdos Renyui random graph specified by random edges.
+#' 
+#' # Viewing an Erdos Renyi random graph specified by random edges.
 #' f = sample(100,size=200,replace=TRUE)
 #' t = sample(100,size=200,replace=TRUE)
 #' vft = rViewGraph(cbind(f,t))
@@ -143,6 +145,7 @@ NULL
 #' # Edges can also be specified in \code{igraph} style.
 #' e = c(t,f)
 #' ve = rViewGraph(e)
+#'
 #' @keywords graph 
 #' @import rJava
 #' @export
@@ -158,8 +161,8 @@ rViewGraphCore <- function (from, to, names=seq(max(from,to)), layout=NULL, dire
 {
 	if (!interactive())
 	{
-		print("rViewGraph only runs in interactive mode")
-		return
+		print("rViewGraph only runs in interactive mode.")
+		return(NULL)
 	}
 
 	.jinit()

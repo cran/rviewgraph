@@ -12,8 +12,8 @@ rviewgraph provides an 'R' interface to Alun Thomas's 'ViewGraph' 'Java' graph v
 \tabular{ll}{
 Package: \tab rviewgraph\cr
 Type: \tab Package\cr
-Version: \tab 1.3.0\cr
-Date: \tab 2020-04-16\cr
+Version: \tab 1.3.1\cr
+Date: \tab 2020-05-06\cr
 License: \tab GPL-2 \cr
 LazyLoad: \tab yes\cr
 SystemRequirements: \tab 'Java' >= 8\cr

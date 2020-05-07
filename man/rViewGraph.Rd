@@ -17,15 +17,32 @@ Genetics. Third Edition, pages 781-805. John Wiley & Sons, Ltd, 2007.
 \usage{
 rViewGraph(object, names, layout, directed, running, ...)
 
-\method{rViewGraph}{default}(object, names = seq(max(object)),
-  layout = NULL, directed = FALSE, running = TRUE, ...)
+\method{rViewGraph}{default}(
+  object,
+  names = seq(max(object)),
+  layout = NULL,
+  directed = FALSE,
+  running = TRUE,
+  ...
+)
 
-\method{rViewGraph}{Matrix}(object, names = 1:max(dim(object)),
-  layout = NULL, directed = FALSE, running = TRUE, ...)
+\method{rViewGraph}{Matrix}(
+  object,
+  names = 1:max(dim(object)),
+  layout = NULL,
+  directed = FALSE,
+  running = TRUE,
+  ...
+)
 
-\method{rViewGraph}{igraph}(object, names = igraph::V(object)$name,
+\method{rViewGraph}{igraph}(
+  object,
+  names = igraph::V(object)$name,
   layout = igraph::layout.random(object),
-  directed = igraph::is.directed(object), running = TRUE, ...)
+  directed = igraph::is.directed(object),
+  running = TRUE,
+  ...
+)
 }
 \arguments{
 \item{object}{the object specifying the graph}
@@ -41,8 +58,10 @@ rViewGraph(object, names, layout, directed, running, ...)
 \item{...}{passed along extra arguments.}
 }
 \value{
-All versions of \code{rViewGraph} return a list of functions that control the actions of 
-the viewer. None of the functions in the list take an argument.
+\code{rViewGraph} is intended only for interactive use. When used in a non-interactive envirionment
+it immediately exists returning the value \code{NULL}.
+Otherwise, all versions of \code{rViewGraph} return a list of functions that control the actions of 
+the interactive viewer. None of the functions in the list take an argument.
 \item{run()}{Starts the GUI running if it's not already doing so.}
 \item{stop()}{Stops the GUI running if it's running.}
 \item{hide()}{Stops the GUI and hides it.}
@@ -126,15 +145,16 @@ the center of the picture canvas.
 }
 }
 \examples{
-# 
-# Viewing an Erdos Renyui random graph specified by random edges.
+
+# Viewing an Erdos Renyi random graph specified by random edges.
 f = sample(100,size=200,replace=TRUE)
 t = sample(100,size=200,replace=TRUE)
 vft = rViewGraph(cbind(f,t))
 #
-# Edges can also be specified in \\code{igraph} style.
+# Edges can also be specified in \code{igraph} style.
 e = c(t,f)
 ve = rViewGraph(e)
+
 }
 \author{
 Alun Thomas
