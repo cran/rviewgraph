@@ -6,48 +6,27 @@ import java.util.Set;
 import java.util.Map;
 import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
+import java.util.ConcurrentModificationException;
 
 public class LocatedMaskedGraph<V,E> implements MaskedGraph<V,E>, LocatedGraph<V,E>
 {
 	public LocatedMaskedGraph(Graph<V,E> graph)
 	{
 		g = graph;
-		show = new LinkedHashSet<V>();
 		hide = new LinkedHashSet<V>();
 
 		point = new LinkedHashMap<V,Coord>();
 		for (V v : g.getVertices())
 		{
-			show.add(v);
 			point.put(v, ( v instanceof Coord ? (Coord) v : new Coord() ) );
 		}
-	}
-
-	public Collection<Coord> getCoords(V v)
-	{
-		Set<Coord> s = new LinkedHashSet<Coord>();
-		s.add(point.get(v));
-		return s;
-	}
-
-	public Collection<Coord> getCoords(Collection<V> c)
-	{
-		Set<Coord> s = new LinkedHashSet<Coord>();
-		for (V v : c)
-			s.add(point.get(v));
-		return s;
-	}
-
-	public Collection<Coord> getCoords()
-	{
-		return point.values();
 	}
 
 	public Collection<Coord> getShownCoords()
 	{
 		Set<Coord> s = new LinkedHashSet<Coord>();
-		for (V v : show)
-			s.add(point.get(v));
+		for (V v : getVertices())
+			s.add(getCoord(v));
 		return s;
 	}
 
@@ -55,7 +34,7 @@ public class LocatedMaskedGraph<V,E> implements MaskedGraph<V,E>, LocatedGraph<V
 	{
 		Set<Coord> s = new LinkedHashSet<Coord>();
 		for (V u : Graphs.component(completeGraph(),v))
-			s.add(point.get(u));
+			s.add(getCoord(u));
 		return s;
 	}
 
@@ -63,7 +42,7 @@ public class LocatedMaskedGraph<V,E> implements MaskedGraph<V,E>, LocatedGraph<V
 	{
 		Set<Coord> s = new LinkedHashSet<Coord>();
 		for (V u : Graphs.component(this,v))
-			s.add(point.get(u));
+			s.add(getCoord(u));
 		return s;
 	}
 
@@ -88,34 +67,46 @@ public class LocatedMaskedGraph<V,E> implements MaskedGraph<V,E>, LocatedGraph<V
 
 	public Coord getCoord(V v)
 	{
-		return point.get(v);
+		Coord d = point.get(v);
+		if (d == null)
+		{
+			d = ( v instanceof Coord ? (Coord) v : new Coord() );
+			point.put(v,d);
+		}
+		return d;
+	}
+
+	public Collection<Coord> getCoords(Collection<V> c)
+	{
+		Set<Coord> s = new LinkedHashSet<Coord>();
+		if (c != null)
+			for (V v : c)
+				s.add(getCoord(v));
+		return s;
+	}
+
+	public Collection<Coord> getCoords(V v)
+	{
+		Set<Coord> s = new LinkedHashSet<Coord>();
+		s.add(getCoord(v));
+		return s;
+	}
+
+	public Collection<Coord> getCoords()
+	{
+		return point.values();
 	}
 
 // Mask interface
 
-	public Graph<V,E> completeGraph()
-	{
-		return g;
-	}
-
-	//synchronized public void show(V x)
 	public void show(V x)
 	{
-		if (hide.contains(x))
-		{
-			hide.remove(x);
-			show.add(x);
-		}
+		hide.remove(x);
 	}
 
-	//synchronized public void hide(V x)
 	public void hide(V x)
 	{
-		if (show.contains(x))
-		{
-			show.remove(x);
-			hide.add(x);
-		}
+		hide.add(x);
 	}
 
 	public void show(Collection<V> c)
@@ -130,51 +121,85 @@ public class LocatedMaskedGraph<V,E> implements MaskedGraph<V,E>, LocatedGraph<V
 			hide(v);
 	}
 
+	public Graph<V,E> completeGraph()
+	{
+		return g;
+	}
+
 // Graph interface
 
 	public boolean contains(Object x)
 	{
-		return show.contains(x);
+		return g.contains(x) && !hide.contains(x);
 	}
 
 	public boolean connects(Object x, Object y)
 	{
-		return show.contains(x) && show.contains(y) && g.connects(x,y);
+		return !hide.contains(x) && !hide.contains(y) && g.connects(x,y);
 	}
 
 	public E connection(Object x, Object y)
 	{
-		return show.contains(x) && show.contains(y) ? g.connection(x,y) : null ;
+		return !hide.contains(x) && !hide.contains(y) ? g.connection(x,y) : null ;
 	}	
 
 	public Collection<E> connections(Object x)
 	{
-		return show.contains(x) ? g.connections(x) : null ;
+		return !hide.contains(x) ? g.connections(x) : null ;
 	}
 
 	public Set<V> getVertices()
 	{
-		return Collections.unmodifiableSet(show);
+		try
+		{
+			Set<V> v = new LinkedHashSet<V>(g.getVertices());
+			v.removeAll(hide);
+			return v;
+		}
+		catch (ConcurrentModificationException e)
+		{
+		//	System.err.println("Caught in LocatedMaskedGraph.getVertices()");
+			return null;
+		}
 	}
 
 	public Collection<V> getNeighbours(Object x)
 	{
-		Collection<V> n = new LinkedHashSet<V>(g.getNeighbours(x));
-		n.retainAll(show);
-		return n;
+		try
+		{
+			Collection<V> n = new LinkedHashSet<V>();
+			Collection<V> h = g.getNeighbours(x);
+			if (h != null)
+				n.addAll(h);
+			n.removeAll(hide);
+			return n;
+		}
+		catch (ConcurrentModificationException e)
+		{
+		//	System.err.println("Caught in LocatedMaskedGraph.getNeighbours()");
+			return null;
+		}
 	}
 
 	public Collection<V> inNeighbours(Object x)
 	{
-		Collection<V> n = new LinkedHashSet<V>(g.inNeighbours(x));
-		n.retainAll(show);
+		//Collection<V> n = new LinkedHashSet<V>(g.inNeighbours(x));
+		Collection<V> n = new LinkedHashSet<V>();
+		Collection<V> h = g.inNeighbours(x);
+		if (h != null)
+			n.addAll(h);
+		n.removeAll(hide);
 		return n;
 	}
 
 	public Collection<V> outNeighbours(Object x)
 	{
-		Collection<V> n = new LinkedHashSet<V>(g.outNeighbours(x));
-		n.retainAll(show);
+		//Collection<V> n = new LinkedHashSet<V>(g.outNeighbours(x));
+		Collection<V> n = new LinkedHashSet<V>();
+		Collection<V> h = g.outNeighbours(x);
+		if (h != null)
+			n.addAll(h);
+		n.removeAll(hide);
 		return n;
 	}
 
@@ -186,7 +211,6 @@ public class LocatedMaskedGraph<V,E> implements MaskedGraph<V,E>, LocatedGraph<V
 // Private data
 	
 	private Graph<V,E> g = null;
-	private Set<V> show = null;
 	private Set<V> hide = null;
 	private Map<V,Coord> point = null;
 }

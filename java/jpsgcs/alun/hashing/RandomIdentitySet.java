@@ -34,7 +34,6 @@ public class RandomIdentitySet<E> extends RandomSet<E>
 		add(c);
 	}
 
-
 	public String toString()
 	{
 		StringBuffer b = new StringBuffer();

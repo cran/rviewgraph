@@ -20,30 +20,21 @@ import java.util.LinkedHashSet;
 
 public class Network<V,E> extends GraphSkeleton<V,E> implements MutableGraph<V,E>
 {
-/**
- Creates an empty undirected Network.
-*/
-	public Network()
-	{
-		this(false,false,false);
-	}
+	// Implement GraphSkeleton abstract method.
 
-/**
- Creates a new directed or undirected Network as specified by the given boolean.
-*/
-	public Network(boolean directed)
+	protected Map<V,E> makeMap()
 	{
-		this(directed,false,false);
-	}
+		if (identity)
+			return new LinkedIdentityHashMap<V,E>();
 
-	public Network(boolean directed, boolean identity)
-	{
-		this(directed,identity,false);
+		if (sorted)
+			return new TreeMap<V,E>();
+
+		return new LinkedHashMap<V,E>();
 	}
 
 	public Network(boolean directed, boolean identity, boolean sorted)
 	{
-		this.directed = directed;
 		this.identity = identity;
 		this.sorted = sorted;
 
@@ -64,113 +55,66 @@ public class Network<V,E> extends GraphSkeleton<V,E> implements MutableGraph<V,E
 		}
 	}
 
+	public Network()
+	{
+		this(false,false,false);
+	}
+
+	public Network(boolean directed)
+	{
+		this(directed,false,false);
+	}
+
+	public Network(boolean directed, boolean identity)
+	{
+		this(directed,identity,false);
+	}
+
 	public Network(int cap)
 	{
-		this.directed = false; 
 		this.identity = false;
 		this.sorted = false;
-
 		f = new LinkedHashMap<V,Map<V,E>>(cap);
-		b = ( directed ? new LinkedHashMap<V,Map<V,E>>(cap) : f );
+		b = f;
 	}
 
-	public boolean isDirected()
-	{
-		return directed;
-	}
+//	Private data.
+
+	private boolean identity = false;
+	private boolean sorted = false;
+
+// Extra methods 
 
 	public boolean isIdentity()
 	{
 		return identity;
 	}
 
-	public Set<V> getNeighbours(Object x)
+	public V firstNeighbour(V x)
 	{
-		if (b == f)
-			return outNeighbours(x);
-		
-		Set<V> n = new LinkedHashSet<V>();
-		n.addAll(inNeighbours(x));
-		n.addAll(outNeighbours(x));
-		return n;
+		return outNeighbours(x).iterator().next();
 	}
 
-	public void disconnect(Object x)
+/*
+	public void uniConnect(V x, V y)
 	{
-		Set<V> neighbs = new LinkedHashSet<V>(getNeighbours(x));
-		for (V v : neighbs)
-			disconnect(x,v);
+		if (!contains(x))
+			add(x);
+		for (V w : new LinkedHashSet<V>(outNeighbours(x)))
+			disconnect(x,w);
+		connect(x,y);
 	}
-
-	public boolean connect(V x, V y, E e)
+	
+	public V uniConnection(V x)
 	{
-		if (connection(x,y) != null && connection(x,y) == e)
-			return false;
-
-                if (!contains(x))
-                        add(x);
-                if (!contains(y))
-                        add(y);
-
-                f.get(x).put(y,e);
-                b.get(y).put(x,e);
-
-		return true;
+		if (f.get(x) == null)
+			return null;
+		return f.get(x).keySet().iterator().next();
 	}
-
-	public boolean connect(V x, V y)
-	{
-		if (connects(x,y))
-			return false;
-
-                if (!contains(x))
-                        add(x);
-                if (!contains(y))
-                        add(y);
-
-                f.get(x).put(y,null);
-                b.get(y).put(x,null);
-
-		return true;
-	}
-
-	public boolean uniConnect(V x, V y)
-	{
-		disconnect(x);
-		return connect(x,y);
-	}
-
-	public E connection(Object x, Object y)
-	{
-		Map<V,E> n = f.get(x);
-		return n == null ? null : n.get(y);
-	}
-
-	public Collection<E> connections(Object x)
-	{
-		Map<V,E> n = f.get(x);
-		return n == null ? null : Collections.unmodifiableCollection(n.values());
-	}
+*/
 
 	public Map<V,E> neighbourMap(Object x)
 	{
 		return f.get(x);
-	}
-
-//	Private data and methods.
-
-	private boolean directed = false;
-	private boolean identity = false;
-	private boolean sorted = false;
-
-	protected Map<V,E> makeMap()
-	{
-		if (identity)
-			return new LinkedIdentityHashMap<V,E>();
-
-		if (sorted)
-			return new TreeMap<V,E>();
-
-		return new LinkedHashMap<V,E>();
 	}
 }

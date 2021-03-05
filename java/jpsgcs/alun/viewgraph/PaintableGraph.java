@@ -6,34 +6,45 @@ import jpsgcs.alun.animate.Paintable;
 import jpsgcs.alun.graph.Coord;
 import java.util.Map;
 import java.util.LinkedHashMap;
+import java.util.Collection;
 import java.awt.Graphics;
 import java.awt.Color;
 
-public class PaintableGraph<V,E> extends LocatedMaskedGraph<V,E> implements Paintable
+public class PaintableGraph<V,E> extends LocatedMaskedGraph<V,E> implements Paintable, MakesRepresentation<V>
 {
-	public PaintableGraph(Graph<V,E> g)
+	public PaintableGraph(Graph<V,E> g, Map<V,VertexRepresentation> map, MakesRepresentation<V> rm)
 	{
 		super(g);
-		node = new LinkedHashMap<V,VertexRepresentation>();
-		for (V v : g.getVertices())
-			node.put(v,new StringNode(v.toString()));
+		repmaker = rm;
+		node = map;
+		//for (V v : g.getVertices())
+		//	if (node.get(v) == null)
+		//		node.put(v,repmaker.makeRepresentation(v));
 	}
 
 	public PaintableGraph(Graph<V,E> g, Map<V,VertexRepresentation> map)
 	{
 		super(g);
-/*
-		node = new LinkedHashMap<V,VertexRepresentation>();
-		for (V v : g.getVertices())
-			node.put(v, map.get(v) == null ? new StringNode(v.toString()) : map.get(v) );
-*/
+		repmaker = this;
 		node = map;
-		for (V v : g.getVertices())
-			if (node.get(v) == null)
-			{
-	//System.err.println(v + " \t null");
-				node.put(v,new StringNode(v.toString()));
-			}
+		//for (V v : g.getVertices())
+		//	if (node.get(v) == null)
+		//		node.put(v,repmaker.makeRepresentation(v));
+	}
+
+	public PaintableGraph(Graph<V,E> g, MakesRepresentation<V> rm)
+	{
+		this(g,new LinkedHashMap<V,VertexRepresentation>(),rm);
+	}
+
+	public PaintableGraph(Graph<V,E> g)
+	{
+		this(g,new LinkedHashMap<V,VertexRepresentation>());
+	}
+
+	public VertexRepresentation makeRepresentation(V v)
+	{
+		return new StringNode(v.toString());
 	}
 
 	public void setArrows(boolean a)
@@ -50,18 +61,25 @@ public class PaintableGraph<V,E> extends LocatedMaskedGraph<V,E> implements Pain
 
 	public V find(double x, double y)
 	{
-		for (V v: getVertices())
-		{
-			Coord pv = getCoord(v);
-			if (node.get(v).contains(pv.x - x, pv.y - y))
-				return v;
-		}
+		Collection<V> verts = getVertices();
+		if (verts != null)
+			for (V v: verts)
+			{
+				Coord pv = getCoord(v);
+				if (getRepresentation(v).contains(pv.x - x, pv.y - y))
+					return v;
+			}
 		return null;
 	}
 
 	public void paint(Graphics g)
 	{
-		for (V v: getVertices())
+		Collection<V> verts = getVertices();
+
+		if (verts == null)
+			return;
+
+		for (V v: verts)
 		{
 			Coord pv = getCoord(v);
 			if (pv.v)
@@ -85,13 +103,19 @@ public class PaintableGraph<V,E> extends LocatedMaskedGraph<V,E> implements Pain
 			}
 		}
 
-		for (V v: getVertices())
+		for (V v: verts)
 		{
 			Coord pv = getCoord(v);
 			if (pv.v)
 			{
-				VertexRepresentation nv = node.get(v);
-				nv.paint(g,pv.x,pv.y, getNeighbours(v).containsAll(completeGraph().getNeighbours(v)));
+				VertexRepresentation nv = getRepresentation(v);
+			//	nv.paint(g,pv.x,pv.y, getNeighbours(v).containsAll(completeGraph().getNeighbours(v)));
+				Collection<V> nall = completeGraph().getNeighbours(v);
+				Collection<V> nshow = getNeighbours(v);
+				boolean comp = true;
+				if (nall != null && nshow != null)
+					comp = nshow.containsAll(nall);
+				nv.paint(g,pv.x,pv.y,comp);
 			}
 		}
 	}
@@ -100,10 +124,16 @@ public class PaintableGraph<V,E> extends LocatedMaskedGraph<V,E> implements Pain
 	{
 		return node;
 	}
-	
+
 	public VertexRepresentation getRepresentation(V v)
 	{
-		return node.get(v);
+		VertexRepresentation r = node.get(v);
+		if (r == null)
+		{
+			r = repmaker.makeRepresentation(v);
+			node.put(v,r);
+		}
+		return r;
 	}
 
 	public void setRepresentation(V v, VertexRepresentation r)
@@ -114,6 +144,7 @@ public class PaintableGraph<V,E> extends LocatedMaskedGraph<V,E> implements Pain
 // Private data
 
 	private Map<V,VertexRepresentation> node = null;
+	private MakesRepresentation repmaker = null;
 
 	private boolean arrows = true;
 	private double arrbs = 4.0;

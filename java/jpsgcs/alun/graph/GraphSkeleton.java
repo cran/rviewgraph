@@ -2,6 +2,7 @@ package jpsgcs.alun.graph;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Collection;
 import java.util.Set;
 import java.util.LinkedHashSet;
 
@@ -19,13 +20,16 @@ import java.util.LinkedHashSet;
         used.
 */
 
-public abstract class GraphSkeleton<V,T> 
+public abstract class GraphSkeleton<V,E> 
 {
-	protected Map<V,Map<V,T>> f = null;
-	protected Map<V,Map<V,T>> b = null;
+	protected Map<V,Map<V,E>> f = null;
+	protected Map<V,Map<V,E>> b = null;
 
-	abstract protected Map<V,T> makeMap();
+	abstract protected Map<V,E> makeMap();
 
+/*
+	Graph functions.
+*/
 	public boolean contains(Object x)
 	{
 		return f.containsKey(x);
@@ -33,26 +37,60 @@ public abstract class GraphSkeleton<V,T>
 
 	public boolean connects(Object x, Object y)
 	{
-		Map<V,T> n = f.get(x);
+		Map<V,E> n = f.get(x);
 		return n == null ? false : n.containsKey(y) ;
 	}
+
+        public E connection(Object x, Object y)
+        {
+                Map<V,E> n = f.get(x);
+                return n == null ? null : n.get(y);
+        }
+
+        public Collection<E> connections(Object x)
+        {
+                Map<V,E> n = f.get(x);
+                return n == null ? null : Collections.unmodifiableCollection(n.values());
+        }
 
 	public Set<V> getVertices()
 	{
 		return Collections.unmodifiableSet(f.keySet());
 	}
 
+        public Set<V> getNeighbours(Object x)
+        {
+                if (b == f)
+                        return outNeighbours(x);
+
+                Set<V> n = new LinkedHashSet<V>();
+		if (inNeighbours(x) != null)
+                	n.addAll(inNeighbours(x));
+		if (outNeighbours(x) != null)
+                	n.addAll(outNeighbours(x));
+                return n;
+        }
+
+        public boolean isDirected()
+        {
+                return f != b;
+        }
+
 	public Set<V> outNeighbours(Object x)
 	{
-		Map<V,T> n = f.get(x);
+		Map<V,E> n = f.get(x);
 		return n == null ? null : Collections.unmodifiableSet(n.keySet());
 	}
 
 	public Set<V> inNeighbours(Object x)
 	{
-		Map<V,T> n = b.get(x);
+		Map<V,E> n = b.get(x);
 		return n == null ? null : Collections.unmodifiableSet(n.keySet());
 	}
+
+/*
+	Mutable graph functions.
+*/
 
 	public void clear()
 	{
@@ -62,9 +100,9 @@ public abstract class GraphSkeleton<V,T>
 
 	public void clearEdges()
 	{
-		for (Map<V,T> n : f.values())
+		for (Map<V,E> n : f.values())
 			n.clear();
-		for (Map<V,T> n : b.values())
+		for (Map<V,E> n : b.values())
 			n.clear();
 	}
 
@@ -76,17 +114,6 @@ public abstract class GraphSkeleton<V,T>
 		f.put(x,makeMap());
 		if (b != f)
 			b.put(x,makeMap());
-
-		return true;
-	}
-
-	public boolean disconnect(Object x, Object y)
-	{
-		if (!contains(x) || !contains(y) || !connects(x,y))
-			return false;
-
-		f.get(x).remove(y);
-		b.get(y).remove(x);
 
 		return true;
 	}
@@ -111,6 +138,49 @@ public abstract class GraphSkeleton<V,T>
 
 		return true;
 	}
+
+        public boolean connect(V x, V y)
+        {
+                if (connects(x,y))
+                        return false;
+
+                if (!contains(x))
+                        add(x);
+                if (!contains(y))
+                        add(y);
+
+                f.get(x).put(y,null);
+                b.get(y).put(x,null);
+
+                return true;
+	}
+
+	public boolean disconnect(Object x, Object y)
+	{
+		if (!contains(x) || !contains(y) || !connects(x,y))
+			return false;
+
+		f.get(x).remove(y);
+		b.get(y).remove(x);
+
+		return true;
+	}
+
+        public boolean connect(V x, V y, E e)
+        {
+                if (connection(x,y) != null && connection(x,y) == e)
+                        return false;
+
+                if (!contains(x))
+                        add(x);
+                if (!contains(y))
+                        add(y);
+
+                f.get(x).put(y,e);
+                b.get(y).put(x,e);
+
+                return true;
+        }
 
 	public String toString()
 	{

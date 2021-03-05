@@ -1,5 +1,6 @@
 package rviewgraph;
 
+import jpsgcs.alun.animate.ActiveCanvas;
 import jpsgcs.alun.animate.Loop;
 import jpsgcs.alun.graph.RootedLocalLocator;
 import jpsgcs.alun.viewgraph.GraphPanel;
@@ -11,14 +12,20 @@ import java.awt.event.WindowEvent;
 
 public class RGraphFrame extends Frame implements WindowListener
 {
-	public void setGraph(PaintableGraph<String,Object> g, boolean r)
+	public void setGraph(PaintableGraph<Integer,Object> g, boolean r)
 	{
 		running = r;
-		pan = new GraphPanel<String,Object>(g,new RootedLocalLocator<String,Object>(),null,running);
+		pan = new GraphPanel<Integer,Object>(g,new RootedLocalLocator<Integer,Object>(),null,running);
+		pan.getCanvas().setCentered(false);
 		add(pan);
 		pack();
 		addWindowListener(this);
 		setVisible(true);
+	}
+
+	public ActiveCanvas getCanvas()
+	{
+		return pan.getCanvas();
 	}
 
 	public void stop()
@@ -97,6 +104,6 @@ public class RGraphFrame extends Frame implements WindowListener
 
 // Private data.
 
-	private GraphPanel<String,Object> pan = null;
+	private GraphPanel<Integer,Object> pan = null;
 	private boolean running = false;
 }

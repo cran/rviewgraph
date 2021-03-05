@@ -3,9 +3,8 @@
 \name{rViewGraph}
 \alias{rViewGraph}
 \alias{rViewGraph.default}
-\alias{rViewGraph.Matrix}
 \alias{rViewGraph.igraph}
-\title{This is a function to create and start the 'Java' graph animation GUI.}
+\title{This is a function to create and start a 'Java' graph animation GUI.}
 \source{
 A full description of the force function and algorithm used 
 is given by
@@ -15,20 +14,13 @@ In D J Balding, M Bishop, and C Cannings, editors, The Handbook of Statistical
 Genetics. Third Edition, pages 781-805. John Wiley & Sons, Ltd, 2007.
 }
 \usage{
-rViewGraph(object, names, layout, directed, running, ...)
+rViewGraph(object, names, cols, shapes, layout, directed, running, ...)
 
 \method{rViewGraph}{default}(
   object,
-  names = seq(max(object)),
-  layout = NULL,
-  directed = FALSE,
-  running = TRUE,
-  ...
-)
-
-\method{rViewGraph}{Matrix}(
-  object,
-  names = 1:max(dim(object)),
+  names = NULL,
+  cols = "yellow",
+  shapes = 0,
   layout = NULL,
   directed = FALSE,
   running = TRUE,
@@ -38,6 +30,8 @@ rViewGraph(object, names, layout, directed, running, ...)
 \method{rViewGraph}{igraph}(
   object,
   names = igraph::V(object)$name,
+  cols = "yellow",
+  shapes = 0,
   layout = igraph::layout.random(object),
   directed = igraph::is.directed(object),
   running = TRUE,
@@ -45,43 +39,105 @@ rViewGraph(object, names, layout, directed, running, ...)
 )
 }
 \arguments{
-\item{object}{the object specifying the graph}
+\item{object}{the object specifying the graph. This can be specified in various ways:
+\itemize{
+\item A square \code{n = dim(object)[1]} by \code{n} real valued incidence matrix. 
+This will create a graph with \code{n} vertices indexed
+by \code{1:n} and edges between vertices with indices \code{i} and \code{j} if \code{object[i,j] != 0}.
+If the graph is directed edges are directed from \code{i} to \code{j} if the entry is positive,
+and from \code{j} to \code{i} if the entry is negative.
+\item An \code{m = dim(object)[1]} by 2 matrix of strictly positive integers
+specifying the indexes of the vertices at the ends of \code{m} edges. This will create a graph with
+\code{n = max(object)} vertices indexed by \code{1:max(object)} and edges connecting the vertex
+indexed by  \code{object[i,1]} to 
+the vertex indexed by  \code{object[i,2]} for each \code{i} in \code{1:m}.
+If the graph is directed, the edges are directed from \code{object[i,1]} to \code{object[i,2]}.
+NOTE: A 2 by 2 matrix will be interpreted as an incidence matrix, not an array of edges.
+\item A vector of \code{2*m} positive integers specifying the indexes of the vertices at 
+the ends of \code{m = length(object)/2} edges. This is the way in which \code{igraph}
+specifies edges. If \code{x} is such a vector, calling \code{rViewGraph{x}} is equivalent
+to calling \code{rViewGraph(matrix(x,ncol=2,byrow=F))}.
+\item An \code{igraph} graph object.
+}}
 
-\item{names}{the names of the nodes}
+\item{names}{the names of the vertices. This is an object that can be interpreted
+as a vector of 
+strings that will be used to label the vertices. If the length is less than the number of
+vertices, the names will be cycled. The default is \code{names = 1:n}, where \code{n}
+is the number of vertices. If unlabeled vertices are required use, for example, \code{names=" "}.
+The size of the string is used to determine the size of the vertex so, for instance,
+\code{names = " A "} will produce bigger vertices than \code{names = "A"}.}
 
-\item{layout}{the starting positions of the vertices}
+\item{cols}{the colours of the vertices. This is on object that can be 
+interpreted as a vector of colours specified in the usual \code{R} ways. 
+If the length is less than the number of vertices, the colours
+will be cycled. The default is \code{cols = "yellow"}.}
 
-\item{directed}{indicates whether or not the graph is directed}
+\item{shapes}{the shapes of the vertices. This is a vector of integers specifying the shapes
+of the vertices. The available shapes are:
+\itemize{
+\item 0 = rectangle
+\item 1 = oval
+\item 2 = diamond
+\item any other values are taken as 0.
+}
+The default is \code{shapes = 0}.}
 
-\item{running}{indicates whether or not to start with animation running}
+\item{layout}{the starting positions of the vertices. This is an \code{n} by 2 array
+of reals with \code{layout[i,]} specifying the horizontal and vertical coordinates
+for the starting point 
+of the \code{i}th vertex. By default this is set to \code{NULL} in which case
+random starting points are used.}
+
+\item{directed}{indicates whether or not the graph is directed.}
+
+\item{running}{indicates whether or not to start with the animation running.}
 
 \item{...}{passed along extra arguments.}
 }
 \value{
-\code{rViewGraph} is intended only for interactive use. When used in a non-interactive envirionment
-it immediately exists returning the value \code{NULL}.
+\code{rViewGraph} is intended only for interactive use. When used in a non-interactive environment
+it immediately exits returning the value \code{NULL}.
 Otherwise, all versions of \code{rViewGraph} return a list of functions that control the actions of 
-the interactive viewer. None of the functions in the list take an argument.
+the interactive viewer. 
 \item{run()}{Starts the GUI running if it's not already doing so.}
 \item{stop()}{Stops the GUI running if it's running.}
 \item{hide()}{Stops the GUI and hides it.}
 \item{show()}{Shows the GUI. If it was running when \code{hide} was called, it starts running again.}
-\item{getLayout()}{Returns the coordinates of the vertices that are currently shown in the GUI. These are in the format that \code{igraph} expects for layouts.}
+\item{getLayout()}{Returns the coordinates of the vertices as currently shown in the GUI.
+These are given as an \code{n} by 2 array as required for the \code{layout} parameter
+of \code{rViewGraph} itself.}
+\item{setLayout(layout = NULL)}{Sets the coordinates of the vertices to the given values. \code{layout}
+is specified in the same way as required for the \code{layout} parameter of \code{rViewGraph}
+itself. The default has \code{layout} set to \code{NULL}, and new random coordinates are generated.}
+\item{hidePaper()}{By default the GUI indicates, with a different colour, the portion
+of the plane that corresponds to the current choice of paper for printing. This function
+removes that area.}
+\item{showPaper(size = "letter", landscape = TRUE)}{Indicates, with a different colour, the portion of the
+plane corresponding to a choice of paper for printing. \code{size} can be any of 
+\code{letter}, \code{A4}, \code{A3}, \code{A2}, \code{A1}, \code{A0}, \code{C1}, or \code{C0}.
+\code{landscape} can be either \code{TRUE} or \code{FALSE}, in which case portrait orientation
+is used. The default is to show the portion of the plane that would be printed on
+US letter in landscape orientation.}
+\item{hideAxes()}{By default, axes are shown to indicate the origin. This
+function hides them.}
+\item{showAxes()}{Shows the axes if they are hidden.}
+\item{writePostScript()}{This starts a \code{Java} PostScript print job dialog box that can be
+used send the current view of the graph to a printer or to write a PostScript file. The plot
+produced should closely match what is indicated by \code{showPaper}.}
+\item{ps()}{Alias for \code{writePostScript}.}
 }
 \description{
-Creates and starts an animated GUI for positioning the vertices of a graph in 2 dimensions.
+Creates and starts an animated graphical user interface (GUI) for 
+positioning the vertices of a graph in 2 dimensions.
 }
 \details{
 Creates and starts a 'Java' GUI showing a real time animation of a Newton-Raphson
 optimization of a force function specified between the vertices of an arbitrary graph.
 There are attractive forces between 
 adjacent vertices and repulsive forces between all vertices.
-The repulsions go smoothly to zero for a finite distance between vertices so that,
+The repulsions go smoothly to zero in a finite distance between vertices so that,
 unlike some other methods, different components don't send each other off to infinity.
-
-This is a generic function that delegates its work to specific functions depending on
-the class of the first argument. It can handle an incidence matrix, a list of 
-edges, and an \code{igraph} graph object.
 
 The program is controlled by a slide bar, some buttons, the arrow, home and
 shift keys, but mostly by mouse operations. All three mouse buttons are used.
@@ -132,7 +188,7 @@ the picture on the canvas ready for outputting.
 \item Left arrow: Rotates the view by 15 degrees clockwise.
 \item Right arrow: Rotates the view by 15 degrees anticlockwise.
 \item Home key: Undoes all scalings and rotations and places the origin at
-the center of the picture canvas.
+the top left corner of the canvas.
 }
 
 \item Key functions with shift key pressed. Mouse has to be in the picture canvas.
@@ -146,14 +202,50 @@ the center of the picture canvas.
 }
 \examples{
 
-# Viewing an Erdos Renyi random graph specified by random edges.
+# First generate the random edges of an Erdos Renyi random graph.
 f = sample(100,size=200,replace=TRUE)
 t = sample(100,size=200,replace=TRUE)
-vft = rViewGraph(cbind(f,t))
-#
-# Edges can also be specified in \code{igraph} style.
-e = c(t,f)
-ve = rViewGraph(e)
+
+# The following should all show the same graph:
+# ... specified as a two column matrix.
+v1 = rViewGraph(cbind(f,t))
+
+# ... in 'igraph' preferred format.
+v2 = rViewGraph(c(f,t))
+
+# ... as an adjacency matrix.
+x = matrix(0,ncol=max(f,t),nrow=max(f,t))
+for (i in 1:length(f)) x[f[i],t[i]] = 1
+v3 = rViewGraph(x)
+
+
+# Specifying names, colours and shapes.
+
+# Use unlabeled vertices, as red, green and blue diamonds.
+v4 = rViewGraph(cbind(f,t), names = "  ", cols = c(2,3,4), shapes=2)
+
+# Use yellow vertices with random shapes, labeled with capital letters.
+y = matrix(sample(1:26,100,TRUE),ncol=2)
+v5 = rViewGraph(y,names=LETTERS,cols="cyan",shapes=sample(0:2,26,TRUE))
+
+
+# Controlling a currently active GUI.
+if (!is.null(v5))
+{
+	# Shift the coordinates, although this is more 
+# easily done with mouse controls.
+	v5$setLayout(100 + v5$getLayout())
+
+# Reset the coordinates to random values.
+v5$setLayout()
+
+	# Pepare a plot for printing, fix it, and start a PostScript print job.
+	v5$hideAxes()
+	v5$showPaper("A3",F)
+	v5$stop()
+	v5$writePostScript()
+}
+
 
 }
 \author{

@@ -11,7 +11,7 @@ class TransformListener extends MouseKeyListener
 {
 	public TransformListener(Canvas c, AffineTransform a)
 	{
-		canv = c;
+		canv = (ActiveCanvas) c;
 		trans = a;
 	}
 
@@ -24,8 +24,15 @@ class TransformListener extends MouseKeyListener
 		{
 		case KeyEvent.VK_HOME:
 			trans.setToIdentity();
-			Dimension d = canv.getSize();
-			trans.translate(d.width/2,d.height/2);
+			if (canv.centered)
+			{
+				Dimension d = canv.getSize();
+				trans.translate(d.width/2,d.height/2);
+			}
+			else
+			{
+				trans.translate(canv.offset,canv.offset);
+			}
 			break;
 		case KeyEvent.VK_DOWN:
 			trans.scale(zoomout,zoomout);
@@ -87,7 +94,7 @@ class TransformListener extends MouseKeyListener
 
 // Private data and methods.
 
-	private Canvas canv = null;
+	private ActiveCanvas canv = null;
 	private AffineTransform trans = null;
 
 	private double zoomout = 9.0/10;

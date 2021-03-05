@@ -32,7 +32,7 @@ public class StringNode implements VertexRepresentation
 
 		diagcolor = background;
 		
-		shape = h;
+		setShape(h);
 	}
 
 	public StringNode(StringNode s)
@@ -42,7 +42,7 @@ public class StringNode implements VertexRepresentation
 		text = s.text;
 		border0 = s.border0;
 		border1 = s.border1;
-		shape = s.shape;
+		setShape(s.shape);
 		diagcolor = s.diagcolor;
 		diag = s.diag;
 	}
@@ -59,11 +59,13 @@ public class StringNode implements VertexRepresentation
 
 		switch(shape)
 		{
-		case 0: drawRect(g,x,y,w,h,true);
-			break;
 		case 1: drawOval(g,x,y,w,h,true);
 			break;
 		case 2: drawDiamond(g,x,y,w,h,true);
+			break;
+		case 0:
+		default:
+			drawRect(g,x,y,w,h,true);
 			break;
 		}
 
@@ -71,11 +73,13 @@ public class StringNode implements VertexRepresentation
 
 		switch(shape)
 		{
-		case 0: drawRect(g,x,y,w,h,false);
-			break;
 		case 1: drawOval(g,x,y,w,h,false);
 			break;
 		case 2: drawDiamond(g,x,y,w,h,false);
+			break;
+		case 0:
+		default:
+			drawRect(g,x,y,w,h,false);
 			break;
 		}
 

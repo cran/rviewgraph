@@ -12,7 +12,10 @@ public class Coord extends jpsgcs.alun.util.Point
 
 	public Coord()
 	{
-		super();
+	//	super();
+	//	this(10*GraphLocator.randu(),-500+10*GraphLocator.randu());
+		this(10*GraphLocator.randu(),10*GraphLocator.randu());
+	//	this(0,0);
 	}
 
 	public Coord(double x, double y)

@@ -15,6 +15,8 @@ import java.util.ConcurrentModificationException;
 
 public class ActiveCanvas extends BufferedCanvas
 {
+	protected boolean centered = true;
+	protected int offset = 20;
 	private int defwd = 1000;
 	private int defht = 1000;
 	private boolean started = false;
@@ -26,9 +28,26 @@ public class ActiveCanvas extends BufferedCanvas
 
 		started = true;
 		trans = new AffineTransform();
+		
 		Dimension d = getSize();
 		trans.translate(d.width/2,d.height/2);
+
 		addMouseKeyListener(new TransformListener(this,trans));
+	}
+
+	public void setCentered(boolean c)
+	{
+		centered = c;
+		trans.setToIdentity();
+		if (centered)
+		{
+			Dimension d = getSize();
+			trans.translate(d.width/2,d.height/2);
+		}
+		else
+		{
+			trans.translate(offset,offset);
+		}
 	}
 
 	public void addMouseKeyListener(MouseKeyListener m)

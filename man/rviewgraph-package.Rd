@@ -12,8 +12,8 @@ rviewgraph provides an 'R' interface to Alun Thomas's 'ViewGraph' 'Java' graph v
 \tabular{ll}{
 Package: \tab rviewgraph\cr
 Type: \tab Package\cr
-Version: \tab 1.3.1\cr
-Date: \tab 2020-05-06\cr
+Version: \tab 1.3.2\cr
+Date: \tab 2021-03-03\cr
 License: \tab GPL-2 \cr
 LazyLoad: \tab yes\cr
 SystemRequirements: \tab 'Java' >= 8\cr
@@ -28,7 +28,8 @@ components. The coordinates can be read as an \code{igraph} style layout matrix 
 The user can mess with the layout using a mouse, preferably one with 3 buttons,
 and some keyed commands.
 
-The only function that the user needs to know about in this package is 
-\code{rViewGraph()}. It launches the GUI by delegating to specific functions depending
-on the class of the arguments.
+The main function that the user needs to know about in this package is 
+\code{rViewGraph()}. It launches the graphical user interface by delegating to specific functions depending
+on the class of the arguments. The returned structure has function elements that control
+the view of the graph.
 }

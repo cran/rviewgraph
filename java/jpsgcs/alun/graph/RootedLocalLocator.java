@@ -13,7 +13,12 @@ public class RootedLocalLocator<V,E> extends LocalLocator<V,E>
 		double gamma = d*d;
 		double alpha = 2*d;
 		
-		Collection<V> vertices = new LinkedHashSet<V>(g.getVertices());
+		
+		//Collection<V> vertices = new LinkedHashSet<V>(g.getVertices());
+		Collection<V> vertices = g.getVertices();
+		if (vertices == null)
+			return 0;
+
 		RadixPlaneSorter<Coord> p = null;
 		if (alpha > Double.MIN_VALUE)
 		{
@@ -36,7 +41,12 @@ public class RootedLocalLocator<V,E> extends LocalLocator<V,E>
 				addDerivatives(D, rootedLocalRepulsions(pa,p.getLocal(pa,Math.sqrt(gamma)),gamma), alpha);
 			}
 
-			addDerivatives(D, squaredAttractions(pa,g.getCoords(g.getNeighbours(a))), 1);
+			Collection<V> nh = g.getNeighbours(a);
+			Collection<Coord> nc = g.getCoords(nh);
+			addDerivatives(D, squaredAttractions(pa,nc), 1);
+			
+		//	addDerivatives(D, squaredAttractions(pa,g.getCoords(g.getNeighbours(a))), 1);
+
 			delta += update(pa,D);
 
 			if (p != null)

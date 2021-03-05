@@ -36,13 +36,13 @@ public class GraphAnimator<V,E> implements SafeRunnable
 		}
 		catch (ConcurrentModificationException e)
 		{
-	//		System.err.println("Caught in GraphAnimator.loop()");
-	//		e.printStackTrace();
+		//	System.err.println("Caught in GraphAnimator.loop()");
+		//	e.printStackTrace();
 		}
 		catch (Exception e)
 		{
-			System.err.println("Caught in GraphAnimator.loop()");
-			e.printStackTrace();
+		//	System.err.println("Caught in GraphAnimator.loop()");
+		//	e.printStackTrace();
 		//	System.exit(1);
 		}
 	}

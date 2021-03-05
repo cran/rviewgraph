@@ -397,6 +397,7 @@ abstract public class AbstractLinkedHashMap<K,V> implements Map<K,V>
 
 // Additional methods to allow querying of structure as a list.
 
+/*
 	public K next(Object k)
 	{
 		Entry <K,V> e = getEntry(hashOf(k),k);
@@ -422,6 +423,7 @@ abstract public class AbstractLinkedHashMap<K,V> implements Map<K,V>
 	{
 		return tail == null ? null : tail.getKey();
 	}
+*/
 
 /*
 	public void add(K k)

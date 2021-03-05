@@ -5,12 +5,16 @@ import jpsgcs.alun.graph.Network;
 import jpsgcs.alun.viewgraph.PaintableGraph;
 import jpsgcs.alun.viewgraph.StringNode;
 import jpsgcs.alun.viewgraph.VertexRepresentation;
+import jpsgcs.alun.animate.PaperTypes;
 
 import java.util.Map;
 import java.util.LinkedHashMap;
 import java.util.Vector;
 import java.util.Random;
 import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.PrintJob;
+import java.awt.Toolkit;
 
 public class RViewGraph
 {
@@ -49,6 +53,20 @@ public class RViewGraph
 			n++;
 
 			String[] names = new String[n];
+
+			int[] r = new int[n];
+			int[] g = new int[n];
+			int[] b = new int[n];
+			int[] s = new int[n];
+
+			for (int i=0; i<n; i++)
+			{
+				r[i] = 255;
+				g[i] = 255;
+				b[i] = 255;
+				s[i] = 1;
+			}
+
 			double[] x = new double[n];
 			double[] y = new double[n];
 
@@ -68,7 +86,7 @@ public class RViewGraph
 				System.exit(0);
 			}
 
-			RViewGraph rvg = new RViewGraph(names,f,t,x,y,false,true);
+			RViewGraph rvg = new RViewGraph(names.length,names,f,t,r,g,b,s,x,y,false,true);
 		}
 		catch (Exception e)
 		{
@@ -77,36 +95,49 @@ public class RViewGraph
 		}
 	}
 
-	public RViewGraph(String[] vv, int[] f, int[] t, double[] x, double[] y, boolean d, boolean r)
+	public RViewGraph(int n, String[] vv, int[] fr, int[] to, 
+		int[] red, int[] green, int[] blue, int[] shape, 
+		double[] x, double[] y, boolean directed, boolean run)
 	{
 		v = vv;
 
-		Network<String,Object> net = new Network<String,Object>(d);
-		Map<String,VertexRepresentation> map = new LinkedHashMap<String,VertexRepresentation>();
+		Network<Integer,Object> net = new Network<Integer,Object>(directed);
+		Map<Integer,VertexRepresentation> map = new LinkedHashMap<Integer,VertexRepresentation>();
 
-		for (int i=0; i<v.length; i++)
+		//for (int i=0; i<v.length; i++)
+		for (int i=0; i<n; i++)
 		{
-			net.add(v[i]);
-			map.put(v[i],new StringNode(v[i]));
-			map.get(v[i]).setColor(Color.yellow);
+			net.add(i);
+			StringNode nod = new StringNode(v[i]);
+			nod.setColor(new Color(red[i],green[i],blue[i]));
+			nod.setShape(shape[i]);
+			map.put(i,nod);
 		}
 
-		for (int i=0; i<f.length; i++)
-			net.connect(v[f[i]],v[t[i]]);
+		for (int i=0; i<fr.length; i++)
+			net.connect(fr[i],to[i]);
 
-		g = new PaintableGraph<String,Object>(net,map);
+		g = new PaintableGraph<Integer,Object>(net,map);
 
 		setCoords(x,y);
 
 		rgf = new RGraphFrame();
-		rgf.setGraph(g,r);
+		rgf.setGraph(g,run);
+		// A4 landscape
+		//int ht = (int) (72/2.54 * 21.0);
+		//int wd = (int) (72/2.54 * 29.7);
+		// Letter landscape
+		int ht = (int) (72*8.5);
+		int wd = (int) (72*11);
+		rgf.getCanvas().setSize(40+wd,40+ht);
+		rgf.pack();
 	}
 
 	public void setCoords(double[] x, double[] y)
 	{
 		for (int i=0; i<v.length; i++)
 		{
-			Coord p = g.getCoord(v[i]);
+			Coord p = g.getCoord(i);
 			p.x = x[i];
 			p.y = y[i];
 		}
@@ -116,7 +147,7 @@ public class RViewGraph
 	{
 		double[] x = new double[v.length];
 		for (int i=0; i<x.length; i++)
-			x[i] = g.getCoord(v[i]).x;
+			x[i] = g.getCoord(i).x;
 		return x;
 	}
 
@@ -124,13 +155,84 @@ public class RViewGraph
 	{
 		double[] x = new double[v.length];
 		for (int i=0; i<x.length; i++)
-			x[i] = g.getCoord(v[i]).y;
+			x[i] = g.getCoord(i).y;
 		return x;
+	}
+
+	public void run()
+	{
+		rgf.run();
+	}
+
+	public void stop()
+	{
+		rgf.stop();
+	}
+
+	public void show()
+	{
+		rgf.myshow();
+	}
+
+	public void hide()
+	{
+		rgf.myhide();
+	}
+
+	public void showPaper(int i)
+	{
+		if (i >= 0 && i <PaperTypes.list.length)
+			rgf.getCanvas().setPaper(PaperTypes.list[i]);
+	}
+
+	public void hidePaper()
+	{
+		rgf.getCanvas().setPaper(null);
+	}
+
+	public void showAxes()
+	{
+		rgf.getCanvas().setAxes(true);
+	}
+
+	public void hideAxes()
+	{
+		rgf.getCanvas().setAxes(false);
+	}
+
+	public int writePostScript(String s)
+	// Can't seem to set the default file name in the screen dump window, but
+	// will keep the argument there in case I figure it out.
+	{
+                Toolkit t = Toolkit.getDefaultToolkit();
+                if (t == null)
+			return 1;
+
+                PaperTypes p = rgf.getCanvas().getPaper();
+                if (p == null)
+                        p = PaperTypes.list[1];
+
+                PrintJob j = t.getPrintJob(rgf,"Canvas plot",null,p.getAttributes());
+
+                if (j == null)
+			return 2;
+
+                Graphics g = j.getGraphics();
+                if (g == null)
+			return 3;
+
+                rgf.getCanvas().plot(g);
+                g.dispose();
+                j.end();
+
+                rgf.getCanvas().repaint();
+
+		return 0;
 	}
 
 // Private data.
 
 	private RGraphFrame rgf = null;
 	private String[] v = null;
-	private PaintableGraph<String,Object> g = null;
+	private PaintableGraph<Integer,Object> g = null;
 }

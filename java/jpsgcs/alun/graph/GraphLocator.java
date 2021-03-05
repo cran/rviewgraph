@@ -23,13 +23,16 @@ abstract public class GraphLocator<V,E>
 
 		for (Coord p : g.getCoords())
 		{
-			p.x = randu()*1000 - 500 ;
-			p.y = randu()*1000 - 500 ;
+			if (p.m)
+			{
+				p.x = randu()*1000 - 500 ;
+				p.y = randu()*1000 - 500 ;
 
-//			r += dr;
-//			t += dt;
-//			p.x = r*Math.cos(t);
-//			p.y = r*Math.sin(t);
+	//			r += dr;
+	//			t += dt;
+	//			p.x = r*Math.cos(t);
+	//			p.y = r*Math.sin(t);
+			}
 		}
 	}
 
@@ -42,9 +45,9 @@ abstract public class GraphLocator<V,E>
 	// and this will do to space out starting points
 	// for vertices. Yeah RANDU!
 
-	private long seed = 1;
+	static private long seed = 1;
 
-	protected double randu()
+	static protected double randu()
 	{
 		seed = (seed * 65539) % 2147483648l;
 		return  seed/2147483648.0;
