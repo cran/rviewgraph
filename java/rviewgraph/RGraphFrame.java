@@ -2,7 +2,9 @@ package rviewgraph;
 
 import jpsgcs.alun.animate.ActiveCanvas;
 import jpsgcs.alun.animate.Loop;
+import jpsgcs.alun.graph.GraphLocator;
 import jpsgcs.alun.graph.RootedLocalLocator;
+import jpsgcs.alun.graph.DAGLocator;
 import jpsgcs.alun.viewgraph.GraphPanel;
 import jpsgcs.alun.viewgraph.PaintableGraph;
 
@@ -12,16 +14,31 @@ import java.awt.event.WindowEvent;
 
 public class RGraphFrame extends Frame implements WindowListener
 {
-	public void setGraph(PaintableGraph<Integer,Object> g, boolean r)
+	public void setGraph(PaintableGraph<Integer,Object> g, boolean d, boolean r)
 	{
 		running = r;
-		pan = new GraphPanel<Integer,Object>(g,new RootedLocalLocator<Integer,Object>(),null,running);
+
+		GraphLocator<Integer,Object> loc = new RootedLocalLocator<Integer,Object>();
+		if (d)
+			loc = new DAGLocator<Integer,Object>();
+	
+		pan = new GraphPanel<Integer,Object>(g,loc,null,running);
 		pan.getCanvas().setCentered(false);
 		add(pan);
 		pack();
 		addWindowListener(this);
 		setVisible(true);
 	}
+
+/*
+	public void setDirected(boolean d)
+	{
+		if (d)
+			pan.setLocator(new DAGLocator<Integer,Object>());
+		else
+			pan.setLocator(new RootedLocalLocator<Integer,Object>());
+	}
+*/
 
 	public ActiveCanvas getCanvas()
 	{
@@ -39,6 +56,11 @@ public class RGraphFrame extends Frame implements WindowListener
 		setVisible(true);
 		pan.getLoop().start();
 		running = true;
+	}
+
+	public boolean isRunning()
+	{
+		return running;
 	}
 
 	public void myshow()

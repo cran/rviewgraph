@@ -2,6 +2,10 @@
 
 S3method(rViewGraph,default)
 S3method(rViewGraph,igraph)
+S3method(vg,"NULL")
+S3method(vg,default)
+S3method(vg,list)
 export(rViewGraph)
+export(vg)
 import(grDevices)
 import(rJava)

@@ -122,7 +122,7 @@ public class RViewGraph
 		setCoords(x,y);
 
 		rgf = new RGraphFrame();
-		rgf.setGraph(g,run);
+		rgf.setGraph(g,false,run);
 		// A4 landscape
 		//int ht = (int) (72/2.54 * 21.0);
 		//int wd = (int) (72/2.54 * 29.7);

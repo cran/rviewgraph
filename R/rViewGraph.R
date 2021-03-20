@@ -1,37 +1,3 @@
-#' @name rviewgraph-package
-#' @aliases rviewgraph-package rviewgraph
-#' @docType package
-#' @title  Animated Graph Layout Viewer
-#' @description
-#' rviewgraph provides an 'R' interface to Alun Thomas's 'ViewGraph' 'Java' graph viewing program.
-#' 
-#' @details
-#' \tabular{ll}{
-#' Package: \tab rviewgraph\cr
-#' Type: \tab Package\cr
-#' Version: \tab 1.3.2\cr
-#' Date: \tab 2021-03-03\cr
-#' License: \tab GPL-2 \cr
-#' LazyLoad: \tab yes\cr
-#' SystemRequirements: \tab 'Java' >= 8\cr
-#' }
-#' This package provides an 'R' interface to Alun Thomas's 'ViewGraph' 'Java' graph viewing program.
-#' It takes a graph specified as an incidence matrix, array of edges, or in \code{igraph} format
-#' and runs a graphical user interface that shows an
-#' animation of a force directed algorithm positioning the vertices in two dimensions.
-#' It works well for graphs of various structure
-#' of up to a few thousand vertices. It's not fazed by graphs that comprise several
-#' components. The coordinates can be read as an \code{igraph} style layout matrix at any time.
-#' The user can mess with the layout using a mouse, preferably one with 3 buttons,
-#' and some keyed commands.
-#' 
-#' The main function that the user needs to know about in this package is 
-#' \code{rViewGraph()}. It launches the graphical user interface by delegating to specific functions depending
-#' on the class of the arguments. The returned structure has function elements that control
-#' the view of the graph.
-#'
-#' 
-NULL
 
 #' This is a function to create and start a 'Java' graph animation GUI.
 #' 
@@ -45,7 +11,7 @@ NULL
 #' by \code{1:n} and edges between vertices with indices \code{i} and \code{j} if \code{object[i,j] != 0}.
 #' If the graph is directed edges are directed from \code{i} to \code{j} if the entry is positive,
 #' and from \code{j} to \code{i} if the entry is negative.
-#' \item An \code{m = dim(object)[1]} by 2 matrix of strictly positive integers
+#' \item An \code{m = dim(object)[1]} by 2 matrix of positive integers
 #' specifying the indexes of the vertices at the ends of \code{m} edges. This will create a graph with
 #' \code{n = max(object)} vertices indexed by \code{1:max(object)} and edges connecting the vertex
 #' indexed by  \code{object[i,1]} to 
@@ -98,65 +64,8 @@ NULL
 #' 
 #' The program is controlled by a slide bar, some buttons, the arrow, home and
 #' shift keys, but mostly by mouse operations. All three mouse buttons are used.
+#' The interactive mouse, key and slide bar operations are described below.
 #' 
-#' \itemize{
-#' \item The slide bar at the bottom controls the repulsive force in the energy
-#' equation used to set the coordinates.
-#'
-#' \item Mouse operations without shift key and without control key pressed.
-#' \enumerate{
-#' \item Left mouse: Drags a vertex. Vertex is free on release. 
-#' \item Middle mouse: Drags a vertex. Vertex is fixed at release position. 
-#' \item Right mouse: Translates the view by the amount dragged. A bit like putting
-#' your finger on a piece of paper and moving it. 
-#' \item Double click with any mouse button in the background: 
-#' Resets the vertices to new random positions. 
-#' }
-#'
-#' \item Mouse operations with shift key but without control key pressed.
-#' \enumerate{
-#' \item Left mouse: Drags a vertex and the component it is in. 
-#' Vertex and component free on release.
-#' \item Middle mouse: Drags a vertex and the component it is in. 
-#' Vertex and component are fixed at release positions.
-#' \item Right mouse: Translates the positions of the vertices relative to 
-#' the position of the canvas by the amount dragged. This is useful to center 
-#' the picture on the canvas ready for outputting.
-#' }
-#'
-#' \item Mouse operations without shift key but with control key pressed.
-#' \enumerate{
-#' \item Left mouse: Click on a vertex to un-delete any deleted neighbours.
-#' \item Middle mouse: Click on a vertex to delete it from the graph.
-#' \item Double click left mouse: Replaces all deleted vertices in the graph.
-#' \item Double click middle mouse: Deletes all vertices from the graph.
-#' }
-#'
-#' \item Mouse operations with shift key and with control key pressed.
-#' \enumerate{
-#' \item Left mouse: Click on a vertex to replace all vertices in the same component to the graph.
-#' \item Middle mouse: Click on a vertex to delete it and the component it is in from the graph.
-#' }
-#'
-#' \item Key functions without shift key pressed. Mouse has to be in the picture canvas.
-#' \enumerate{
-#' \item Up arrow: Increases the scale of viewing by 10\%.
-#' \item Down arrow: Decreases the scale of viewing by 10\%.
-#' \item Left arrow: Rotates the view by 15 degrees clockwise.
-#' \item Right arrow: Rotates the view by 15 degrees anticlockwise.
-#' \item Home key: Undoes all scalings and rotations and places the origin at
-#' the top left corner of the canvas.
-#' }
-#'
-#' \item Key functions with shift key pressed. Mouse has to be in the picture canvas.
-#' \enumerate{
-#' \item Up arrow: Increases the vertex positions by 10\% relative to the scale of the canvas.
-#' \item Down arrow: Decreases the vertex positions by 10\% relative to the scale of the canvas.
-#' \item Left arrow: Rotates the vertex positions by 15 degrees clockwise relative to the canvas orientation.
-#' \item Right arrow: Rotates the vertex positions by 15 degrees anticlockwise relative to the canvas orientation.
-#' }
-#' }
-#'
 #' @return
 #' \code{rViewGraph} is intended only for interactive use. When used in a non-interactive environment
 #' it immediately exits returning the value \code{NULL}.
@@ -189,6 +98,9 @@ NULL
 #' produced should closely match what is indicated by \code{showPaper}.}
 #' \item{ps()}{Alias for \code{writePostScript}.}
 #' 
+#'
+#' @inheritSection vg Interactive mouse, key and slide bar controls
+#'
 #' @source A full description of the force function and algorithm used 
 #' is given by
 #' C Cannings and A Thomas, 
@@ -277,7 +189,7 @@ rViewGraphCore <- function (from, to, names=seq(max(from,to)),
 
 	if (min(to,from) < 0)
 	{
-		stop("All vertex indexes must be non negative.")
+		stop("All vertex indexes must be positive.")
 	}
 
 	n <- max(to,from)+1

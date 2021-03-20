@@ -46,7 +46,7 @@ This will create a graph with \code{n} vertices indexed
 by \code{1:n} and edges between vertices with indices \code{i} and \code{j} if \code{object[i,j] != 0}.
 If the graph is directed edges are directed from \code{i} to \code{j} if the entry is positive,
 and from \code{j} to \code{i} if the entry is negative.
-\item An \code{m = dim(object)[1]} by 2 matrix of strictly positive integers
+\item An \code{m = dim(object)[1]} by 2 matrix of positive integers
 specifying the indexes of the vertices at the ends of \code{m} edges. This will create a graph with
 \code{n = max(object)} vertices indexed by \code{1:max(object)} and edges connecting the vertex
 indexed by  \code{object[i,1]} to 
@@ -141,16 +141,27 @@ unlike some other methods, different components don't send each other off to inf
 
 The program is controlled by a slide bar, some buttons, the arrow, home and
 shift keys, but mostly by mouse operations. All three mouse buttons are used.
+The interactive mouse, key and slide bar operations are described below.
+}
+\section{Interactive mouse, key and slide bar controls}{
+
 
 \itemize{
-\item The slide bar at the bottom controls the repulsive force in the energy
+\item Slide bars at the bottom of the GUI control the 
+repulsive force in the energy
 equation used to set the coordinates.
+If the graph is undirected, there is a single 'Repulsion' parameter, 
+if directed, there
+are 'X-Repulsion' and 'Y-Repulsion' parameters, 
+and a 'Gravity' parameter that influences
+how these are combined.
 
 \item Mouse operations without shift key and without control key pressed.
 \enumerate{
 \item Left mouse: Drags a vertex. Vertex is free on release. 
 \item Middle mouse: Drags a vertex. Vertex is fixed at release position. 
-\item Right mouse: Translates the view by the amount dragged. A bit like putting
+\item Right mouse: Translates the view by the amount dragged. 
+A bit like putting
 your finger on a piece of paper and moving it. 
 \item Double click with any mouse button in the background: 
 Resets the vertices to new random positions. 
@@ -169,19 +180,21 @@ the picture on the canvas ready for outputting.
 
 \item Mouse operations without shift key but with control key pressed.
 \enumerate{
-\item Left mouse: Click on a vertex to un-delete any deleted neighbours.
-\item Middle mouse: Click on a vertex to delete it from the graph.
-\item Double click left mouse: Replaces all deleted vertices in the graph.
-\item Double click middle mouse: Deletes all vertices from the graph.
+\item Left mouse: Click on a vertex to un-hide any hidden neighbours.
+\item Middle mouse: Click on a vertex to hide it.
+\item Double click left mouse: Un-hides all hidden vertices.
+\item Double click middle mouse: Hides all vertices.
 }
 
 \item Mouse operations with shift key and with control key pressed.
 \enumerate{
-\item Left mouse: Click on a vertex to replace all vertices in the same component to the graph.
-\item Middle mouse: Click on a vertex to delete it and the component it is in from the graph.
+\item Left mouse: Click on a vertex to un-hide all vertices 
+in the same component.
+\item Middle mouse: Click on a vertex to hide it and the component it is in.
 }
 
-\item Key functions without shift key pressed. Mouse has to be in the picture canvas.
+\item Key functions without shift key pressed. 
+Mouse has to be in the picture canvas.
 \enumerate{
 \item Up arrow: Increases the scale of viewing by 10\%.
 \item Down arrow: Decreases the scale of viewing by 10\%.
@@ -191,15 +204,21 @@ the picture on the canvas ready for outputting.
 the top left corner of the canvas.
 }
 
-\item Key functions with shift key pressed. Mouse has to be in the picture canvas.
+\item Key functions with shift key pressed. 
+Mouse has to be in the picture canvas.
 \enumerate{
-\item Up arrow: Increases the vertex positions by 10\% relative to the scale of the canvas.
-\item Down arrow: Decreases the vertex positions by 10\% relative to the scale of the canvas.
-\item Left arrow: Rotates the vertex positions by 15 degrees clockwise relative to the canvas orientation.
-\item Right arrow: Rotates the vertex positions by 15 degrees anticlockwise relative to the canvas orientation.
+\item Up arrow: Increases the vertex positions by 10\% 
+relative to the scale of the canvas.
+\item Down arrow: Decreases the vertex positions by 10\% 
+relative to the scale of the canvas.
+\item Left arrow: Rotates the vertex positions by 15 
+degrees clockwise relative to the canvas orientation.
+\item Right arrow: Rotates the vertex positions by 15 
+degrees anticlockwise relative to the canvas orientation.
 }
 }
 }
+
 \examples{
 
 # First generate the random edges of an Erdos Renyi random graph.

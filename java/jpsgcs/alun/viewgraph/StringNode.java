@@ -119,7 +119,6 @@ public class StringNode implements VertexRepresentation
 		text = c;
 	}
 
-
 	public void setBorderColors(Color c, Color d)
 	{
 		border0 = c;
@@ -163,7 +162,45 @@ public class StringNode implements VertexRepresentation
 	{
 		diagcolor = b;
 	}
+
+	public String getString()
+	{
+		return name;
+	}
 	
+	public void fixSize(int fw, int fh)
+	{
+		if (fw >= 0 || fh >= 0)
+		{
+			w = fw;
+			h = fh;
+			sizeset = true;
+			fixed = true;
+		}
+		else
+		{
+			fixed = false;
+			sizeset = false;
+		}
+	}
+
+	public boolean isFixedSize()
+	{
+		return fixed;
+	}
+
+	public void unfixSize()
+	{
+		fixed = false;
+		sizeset = false;
+	}
+
+	public void setString(String s)
+	{
+		name = s;
+		sizeset = false;
+	}
+
 // Private data.
 
 	protected String name = null;
@@ -182,6 +219,7 @@ public class StringNode implements VertexRepresentation
 	protected int w = 8;
 	protected int h = 8;
 	protected boolean sizeset = false;
+	protected boolean fixed = false;
 	protected int xfill = 4;
 	protected int yfill = 2;
 

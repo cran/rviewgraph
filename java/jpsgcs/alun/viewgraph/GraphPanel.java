@@ -91,6 +91,16 @@ public class GraphPanel<V,E> extends Panel
 		return graph;
 	}
 
+	public GraphLocator<V,E> getLocator()
+	{
+		return ann.getLocator();
+	}
+	
+	public void setLocator(GraphLocator<V,E> l)
+	{
+		ann.setLocator(l);
+	}
+
 	private PaintableGraph<V,E> graph = null;
 	private ParameterScrollWidget[] w = null;
 	private GraphAnimator<V,E> ann = null;
