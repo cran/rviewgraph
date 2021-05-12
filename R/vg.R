@@ -51,13 +51,14 @@
 #' It also provides functions for saving and restoring a graphical state
 #' including vertices and edges, vertex positions, and vertex appearances.
 #' 
-#' \code{vg} is intended only for interactive use. 
+#' \code{vg} is intended primarily for interactive use. 
 #' When used in a non-interactive environment
-#' it immediately exits returning the value \code{NULL}.
-#' Otherwise, it returns a list of functions that 
-#' specify and query the graph, and control the viewer.
+#' it will run without a visible GUI, however, a graph structure can be
+#' created and saved and viewed in future, interactive, R sessions.
 #'
 #' @return
+#' \code{vg} returns a list of functions that 
+#' specify and query the graph, coordinates and appearance, and control the viewer.
 #'
 #' \item{add(i)}{If the graph does not contain vertices indexed by \code{i},
 #' they are added to it. \code{i} may be any integer or integer vector.}
@@ -346,94 +347,89 @@
 #' @examples
 #' 
 #' # Start the viewer.
+#' # This will print a warning message if not run interactively.
 #' require(rviewgraph)
 #' v = vg()
 #'
-#' # Check that the viewer was made. 
-#' # Not usually necessary in interactive mode.
-#' if (!is.null(v))
-#' {
-#' 	# Generate some random vertices to connect with edges.
-#' 	from = sample(1:20,15,TRUE)
-#' 	to = sample(1:20,15,TRUE)
+#' # Generate some random vertices to connect with edges.
+#' from = sample(1:20,15,TRUE)
+#' to = sample(1:20,15,TRUE)
 #' 
-#' 	# Connect these edges in the viewer.
-#' 	v$connect(from,to)
+#' # Connect these edges in the viewer.
+#' v$connect(from,to)
 #' 
-#' 	# Negative vertex indices are also allowed.
-#' 	v$connect(-from,-to)
+#' # Negative vertex indices are also allowed.
+#' v$connect(-from,-to)
 #' 
-#' 	# Add some new vertices, unconnected to any others.
-#' 	v$add(30:35)
+#' # Add some new vertices, unconnected to any others.
+#' v$add(30:35)
 #' 
-#' 	# Remove some vertices.
-#' 	v$rem((-5:5)*2)
+#' # Remove some vertices.
+#' v$rem((-5:5)*2)
 #'
-#' 	# Query some of the structure of the graph.
-#' 	v$contains(1)
-#' 	v$contains(-1)
-#' 	v$connects(1,-1)
-#' 	v$contains(1:50)
-#' 	v$connects(from,to)
-#' 	v$connects(from,-to+2)
-#'	v$neighbours(from)
+#' # Query some of the structure of the graph.
+#' v$contains(1)
+#' v$contains(-1)
+#' v$connects(1,-1)
+#' v$contains(1:50)
+#' v$connects(from,to)
+#' v$connects(from,-to+2)
+#' v$neighbours(from)
 #' 
-#' 	# Change what some of the vertices look like.
-#' 	v$map(-10:10, lab = "", col=1, shp=1, width=1:15)
-#' 	v$label(10:36, lab=LETTERS)
-#' 	v$colour((-1000:-1),"cyan")
-#' 	v$shape((-1000:-1)*2,2)
+#' # Change what some of the vertices look like.
+#' v$map(-10:10, lab = "", col=1, shp=1, width=1:15)
+#' v$label(10:36, lab=LETTERS)
+#' v$colour((-1000:-1),"cyan")
+#' v$shape((-1000:-1)*2,2)
 #'
-#' 	# Hide the axes.
-#' 	v$hideAxes()
+#' # Hide the axes.
+#' v$hideAxes()
 #'
-#' 	# Stop the animation. 
-#' 	# Not necessary for outputting but sometimes helpful.
-#' 	v$stop()
-#'	
-#' 	# Change the paper size and orientation to A4 portrait.
-#' 	v$showPaper("A4",F)
+#' # Stop the animation. 
+#' # Not necessary for outputting but sometimes helpful.
+#' v$stop()
 #'
-#' 	# Start the print dialog box.
-#' 	v$ps()
+#' # Change the paper size and orientation to A4 portrait.
+#' v$showPaper("A4",FALSE)
 #'
-#' 	# Restart the animation, and check that it's running.
-#' 	v$run()
-#' 	v$isRunning()
+#' # Start the print dialog box.
+#' #v$ps()
 #'
-#' 	# Save the application.
-#' 	s = v$save()
+#' # Restart the animation, and check that it's running.
+#' v$run()
+#' v$isRunning()
 #'
-#' 	# Change the graph and appearance.
-#' 	v$colour(-1000:1000,"red")
-#' 	v$connect(rep(1,100),1:100)
+#' # Save the application.
+#' s = v$save()
 #'
-#' 	# Then decide you didn't like the changes so restore 
-#' 	# the saved state.
-#' 	v$restore(s)
+#' # Change the graph and appearance.
+#' v$colour(-1000:1000,"red")
+#' v$connect(rep(1,100),1:100)
 #'
-#' 	# Can also restore a state in a new GUI.
-#' 	v2 = vg(s)
+#' # Then decide you didn't like the changes so restore 
+#' # the saved state.
+#' v$restore(s)
 #'
-#' 	# Get a vector of all the indices that the viewer has seen.
-#' 	ids = v$getIds()
-#'	
-#' 	# Get a vector of the indices of the vertices currently 
-#' 	# in the graph.
-#' 	verts = v$getVertices()
+#' # Can also restore a state in a new GUI.
+#' v2 = vg(s)
 #'
-#' 	# Get a matrix with 2 columns specifying the current edges 
-#' 	# of the graph.
-#' 	edges = v$getEdges()
+#' # Get a vector of all the indices that the viewer has seen.
+#' ids = v$getIds()
 #'
-#' 	# Get the current coordinates of the specified vertices. 
-#' 	x = v$getX(verts)
-#' 	y = v$getY(verts)
+#' # Get a vector of the indices of the vertices currently 
+#' # in the graph.
+#' verts = v$getVertices()
 #'
-#' 	# Change the current coordinates of the vertices.
-#' 	v$setXY(verts,2*x,0.5*y+2)
+#' # Get a matrix with 2 columns specifying the current edges 
+#' # of the graph.
+#' edges = v$getEdges()
 #'
-#' }
+#' # Get the current coordinates of the specified vertices. 
+#' x = v$getX(verts)
+#' y = v$getY(verts)
+#'
+#' # Change the current coordinates of the vertices.
+#' v$setXY(verts,2*x,0.5*y+2)
 #'
 #'
 #' @keywords graph animation edges vertices 
@@ -499,8 +495,8 @@ vg.default <- function(grob = NULL, directed = FALSE, running = TRUE)
 	{
 		running = directed
 		directed = grob
-		message = paste("Argument 'grob' should be a 'list' or 'NULL'.",
-			"\n\tUsing: grob = NULL, directed = ",directed,", running = ",running,".",sep="")
+#		message = paste("Argument 'grob' should be a 'list' or 'NULL'.",
+#			"\n\tUsing: grob = NULL, directed = ",directed,", running = ",running,".",sep="")
 #		warning(message)
 	}
 	else
@@ -516,13 +512,15 @@ vg.default <- function(grob = NULL, directed = FALSE, running = TRUE)
 vgCore <- function (saved, directed=FALSE, running=TRUE) 
 {
 	# Check that this is running in an interactive session.
+	nogui = FALSE
 	if (!interactive())
 	{
-		print("vg only runs in interactive mode.")
-		return(NULL)
+		nogui = TRUE
+		print("Running without a visible GUI.")
+		
 	}
 
-	# Start Java.
+	# Start Java if it is not already started.
 	.jinit()
 
 	# Check the Java version.
@@ -541,9 +539,17 @@ vgCore <- function (saved, directed=FALSE, running=TRUE)
 	{
 		if (is.jnull(viewer)) 
 		{
-	    		viewer <<- .jnew("rviewgraph/Rvg", directed, running)
+	    		viewer <<- .jnew("rviewgraph/Rvg", directed, running, nogui)
+			showPaper("letter")
+			showAxes()
 		}
     	}
+
+	my.jcall = function(...)
+	{
+		init()
+		.jcall(...)
+	}
 
 	map = function(i, lab = i, col = "yellow", shp = 0, width = -1, height = width)
 	{
@@ -562,13 +568,13 @@ vgCore <- function (saved, directed=FALSE, running=TRUE)
 		width = as.vector(rep(width,length.out=n), mode = "integer")
 		height = as.vector(rep(height,length.out=n), mode = "integer")
 
-		.jcall(viewer,"V","map",.jarray(x),.jarray(lab),
+		my.jcall(viewer,"V","map",.jarray(x),.jarray(lab),
 			.jarray(r),.jarray(g),.jarray(b),.jarray(shp),.jarray(width),.jarray(height))
 	}
 
 	clearMap = function()
 	{
-		.jcall(viewer, "V", "clearMap")
+		my.jcall(viewer, "V", "clearMap")
 	}
 
 	label = function(i, lab = i)
@@ -576,7 +582,7 @@ vgCore <- function (saved, directed=FALSE, running=TRUE)
 		x = as.vector(i, mode = "integer")
 		n = length(x)
 		lab = as.vector(rep(lab,length.out=n), mode = "character")
-		.jcall(viewer,"V","name",.jarray(x),.jarray(lab))
+		my.jcall(viewer,"V","name",.jarray(x),.jarray(lab))
 	}
 
 	colour = function(i, col = "yellow")
@@ -587,7 +593,7 @@ vgCore <- function (saved, directed=FALSE, running=TRUE)
 		r = as.vector(col["red",], mode = "integer")
 		g = as.vector(col["green",], mode = "integer")
 		b = as.vector(col["blue",], mode = "integer")
-		.jcall(viewer,"V","colour",.jarray(x),.jarray(r),.jarray(g),.jarray(b))
+		my.jcall(viewer,"V","colour",.jarray(x),.jarray(r),.jarray(g),.jarray(b))
 	}
 
 	size = function(i, width = -1, height = width)
@@ -596,7 +602,7 @@ vgCore <- function (saved, directed=FALSE, running=TRUE)
 		n = length(x)
 		width = as.vector(rep(width,length.out=n), mode = "integer")
 		height = as.vector(rep(height,length.out=n), mode = "integer")
-		.jcall(viewer,"V","size",.jarray(x),.jarray(width),.jarray(height))
+		my.jcall(viewer,"V","size",.jarray(x),.jarray(width),.jarray(height))
 	}
 
 	shape = function(i, shp = 0)
@@ -604,26 +610,26 @@ vgCore <- function (saved, directed=FALSE, running=TRUE)
 		x = as.vector(i, mode = "integer")
 		n = length(x)
 		shp = as.vector(rep(shp,length.out=n), mode = "integer")
-		.jcall(viewer,"V","shape",.jarray(x),.jarray(shp))
+		my.jcall(viewer,"V","shape",.jarray(x),.jarray(shp))
 	}
 
 	add = function(i)
 	{
 		x = as.vector(i, mode="integer")
-		.jcall(viewer,"V","add",.jarray(x))
+		my.jcall(viewer,"V","add",.jarray(x))
 	}
 
 	contains = function(i)
 	{
 		x = as.vector(i, mode="integer")
-		.jcall(viewer,"[Z","contains",.jarray(x))
+		my.jcall(viewer,"[Z","contains",.jarray(x))
 	}
 
 	neighbours = function(i)
 	{
 		l = NULL
 		for (x in as.vector(i, mode="integer"))
-			l = append(l,list(.jcall(viewer,"[I","neighbours",x)))
+			l = append(l,list(my.jcall(viewer,"[I","neighbours",x)))
 		l
 	}
 
@@ -631,7 +637,7 @@ vgCore <- function (saved, directed=FALSE, running=TRUE)
 	{
 		l = NULL
 		for (x in as.vector(i, mode="integer"))
-			l = append(l,list(.jcall(viewer,"[I","inNeighbours",x)))
+			l = append(l,list(my.jcall(viewer,"[I","inNeighbours",x)))
 		l
 	}
 
@@ -639,14 +645,14 @@ vgCore <- function (saved, directed=FALSE, running=TRUE)
 	{
 		l = NULL
 		for (x in as.vector(i, mode="integer"))
-			l = append(l,list(.jcall(viewer,"[I","outNeighbours",x)))
+			l = append(l,list(my.jcall(viewer,"[I","outNeighbours",x)))
 		l
 	}
 
 	rem = function(i)
 	{
 		x = as.vector(i, mode="integer")
-		.jcall(viewer,"V","remove",.jarray(x))
+		my.jcall(viewer,"V","remove",.jarray(x))
 	}
 
 	connect = function(i,j)
@@ -654,7 +660,7 @@ vgCore <- function (saved, directed=FALSE, running=TRUE)
 		n = min(length(i),length(j))
 		x = as.vector(i, mode="integer")[1:n]
 		y = as.vector(j, mode="integer")[1:n]
-		.jcall(viewer,"V","connect",.jarray(x),.jarray(y))
+		my.jcall(viewer,"V","connect",.jarray(x),.jarray(y))
 	}
 
 	connects = function(i,j)
@@ -662,7 +668,7 @@ vgCore <- function (saved, directed=FALSE, running=TRUE)
 		n = min(length(i),length(j))
 		x = as.vector(i, mode="integer")[1:n]
 		y = as.vector(j, mode="integer")[1:n]
-		.jcall(viewer,"[Z","connects",.jarray(x),.jarray(y))
+		my.jcall(viewer,"[Z","connects",.jarray(x),.jarray(y))
 	}
 
 	disconnect = function(i,j)
@@ -670,37 +676,40 @@ vgCore <- function (saved, directed=FALSE, running=TRUE)
 		n = min(length(i),length(j))
 		x = as.vector(i, mode="integer")[1:n]
 		y = as.vector(j, mode="integer")[1:n]
-		.jcall(viewer,"V","disconnect",.jarray(x),.jarray(y))
+		my.jcall(viewer,"V","disconnect",.jarray(x),.jarray(y))
 	}
 
 	clear = function()
 	{
-		.jcall(viewer,"V","clear")
+		my.jcall(viewer,"V","clear")
 	}
 
-	run = function() 
+	run = function(running = TRUE) 
 	{
-		.jcall(viewer, "V", "run")
+		if (running)
+			my.jcall(viewer, "V", "run")
+		else
+			my.jcall(viewer, "V", "stop")
     	}
     
 	stop = function() 
 	{
-		.jcall(viewer, "V", "stop")
+		my.jcall(viewer, "V", "stop")
     	}
 
 	show = function() 
 	{
-		.jcall(viewer, "V", "show")
+		my.jcall(viewer, "V", "show")
     	}
 
     	hide = function() 
 	{
-		.jcall(viewer, "V", "hide")
+		my.jcall(viewer, "V", "hide")
     	}
 
 	writePostScript = function()
 	{
-		error = .jcall(viewer,"I","writePostScript")
+		error = my.jcall(viewer,"I","writePostScript")
 		message = "Done."
 		if (error == 1)
 			message = "Cannot find Java Toolkit."
@@ -737,51 +746,51 @@ vgCore <- function (saved, directed=FALSE, running=TRUE)
 		if (landscape)
 			i = i+1
 		
-		.jcall(viewer,"V","showPaper",as.integer(i))
+		my.jcall(viewer,"V","showPaper",as.integer(i))
 	}
 
 	hidePaper = function()
 	{
-		.jcall(viewer,"V","showPaper",as.integer(0))
+		my.jcall(viewer,"V","showPaper",as.integer(0))
 	}
 
 	showAxes = function()
 	{
-		.jcall(viewer,"V","showAxes")
+		my.jcall(viewer,"V","showAxes")
 	}
 
 	hideAxes = function()
 	{
-		.jcall(viewer,"V","hideAxes")
+		my.jcall(viewer,"V","hideAxes")
 	}
 
 	getIds = function()
 	{
-		.jcall(viewer,"[I","getIndexes")
+		my.jcall(viewer,"[I","getIndexes")
 	}
 
 	getVertices = function()
 	{
-		.jcall(viewer,"[I","getVertices")
+		my.jcall(viewer,"[I","getVertices")
 	}
 
 	getEdges = function()
 	{
-		f = .jcall(viewer,"[I","getFrom")
-		t = .jcall(viewer,"[I","getTo")
+		f = my.jcall(viewer,"[I","getFrom")
+		t = my.jcall(viewer,"[I","getTo")
 		cbind(f,t)
 	}
 
 	getX = function(id)
 	{
 		id = as.vector(id, mode="integer")
-		.jcall(viewer,"[D","getXCoords",.jarray(id))
+		my.jcall(viewer,"[D","getXCoords",.jarray(id))
 	}
 
 	getY = function(id)
 	{
 		id = as.vector(id, mode="integer")
-		.jcall(viewer,"[D","getYCoords",.jarray(id))
+		my.jcall(viewer,"[D","getYCoords",.jarray(id))
 	}
 
 	setXY = function(id, x, y)
@@ -789,48 +798,48 @@ vgCore <- function (saved, directed=FALSE, running=TRUE)
 		id = as.vector(id, mode="integer")
 		x = as.vector(rep(x,length.out=length(id)))
 		y = as.vector(rep(y,length.out=length(id)))
-		.jcall(viewer,"V","setCoords",.jarray(id),.jarray(x),.jarray(y))
+		my.jcall(viewer,"V","setCoords",.jarray(id),.jarray(x),.jarray(y))
 	}
 
 	isDirected = function()
 	{
-		.jcall(viewer,"Z","isDirected")
+		my.jcall(viewer,"Z","isDirected")
 	}
 
 	isRunning = function()
 	{
-		.jcall(viewer,"Z","isRunning")
+		my.jcall(viewer,"Z","isRunning")
 	}
 
 	save = function()
 	{
-		id = .jcall(viewer,"[I","getIndexes")
+		id = my.jcall(viewer,"[I","getIndexes")
 				
 		list (
-			running = .jcall(viewer,"Z","isRunning"),
-			directed = .jcall(viewer,"Z","isDirected"),
+			running = my.jcall(viewer,"Z","isRunning"),
+			directed = my.jcall(viewer,"Z","isDirected"),
 
 			id = id,
 
-			v = .jcall(viewer,"[I","getVertices"),
+			v = my.jcall(viewer,"[I","getVertices"),
 
-			f = .jcall(viewer,"[I","getFrom"),
-			t = .jcall(viewer,"[I","getTo"),
+			f = my.jcall(viewer,"[I","getFrom"),
+			t = my.jcall(viewer,"[I","getTo"),
 
-			l = .jcall(viewer,"[Ljava/lang/String;","getNames",.jarray(id)),
-			#l = .jcall(viewer,"[S","getNames",.jarray(id)),
+			l = my.jcall(viewer,"[Ljava/lang/String;","getNames",.jarray(id)),
+			#l = my.jcall(viewer,"[S","getNames",.jarray(id)),
 
-			r = .jcall(viewer,"[I","getRed",.jarray(id)),
-			g = .jcall(viewer,"[I","getGreen",.jarray(id)),
-			b = .jcall(viewer,"[I","getBlue",.jarray(id)),
+			r = my.jcall(viewer,"[I","getRed",.jarray(id)),
+			g = my.jcall(viewer,"[I","getGreen",.jarray(id)),
+			b = my.jcall(viewer,"[I","getBlue",.jarray(id)),
 
-			s = .jcall(viewer,"[I","getShape",.jarray(id)),
+			s = my.jcall(viewer,"[I","getShape",.jarray(id)),
 
-			w = .jcall(viewer,"[I","getWidth",.jarray(id)),
-			h = .jcall(viewer,"[I","getHeight",.jarray(id)),
+			w = my.jcall(viewer,"[I","getWidth",.jarray(id)),
+			h = my.jcall(viewer,"[I","getHeight",.jarray(id)),
 
-			x = .jcall(viewer,"[D","getXCoords",.jarray(id)),
-			y = .jcall(viewer,"[D","getYCoords",.jarray(id)),
+			x = my.jcall(viewer,"[D","getXCoords",.jarray(id)),
+			y = my.jcall(viewer,"[D","getYCoords",.jarray(id)),
 
 			NULL
 		)
@@ -855,17 +864,11 @@ vgCore <- function (saved, directed=FALSE, running=TRUE)
 
 	# Create the GUI and set the state.
 
-   	viewer = NULL
+	viewer = NULL
     	init()
 	stop()
 	restore(saved)
-	if (running)
-		run()
-	else
-		stop()
-
-	showPaper("letter")
-	showAxes()
+	run(running)
 
 	# Return the GUI object.
 

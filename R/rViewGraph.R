@@ -109,6 +109,8 @@
 #' Genetics. Third Edition, pages 781-805. John Wiley & Sons, Ltd, 2007.
 #' 
 #' @examples
+#'
+#' require(rviewgraph)
 #' 
 #' # First generate the random edges of an Erdos Renyi random graph.
 #' f = sample(100,size=200,replace=TRUE)

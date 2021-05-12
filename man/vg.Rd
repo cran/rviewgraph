@@ -32,6 +32,9 @@ undirected graph there is a single control.}
 with the animation running. By default \code{running = TRUE}.}
 }
 \value{
+\code{vg} returns a list of functions that 
+specify and query the graph, coordinates and appearance, and control the viewer.
+
 \item{add(i)}{If the graph does not contain vertices indexed by \code{i},
 they are added to it. \code{i} may be any integer or integer vector.}
 
@@ -258,11 +261,10 @@ to a lesser extent, for arbitrary directed graphs.
 It also provides functions for saving and restoring a graphical state
 including vertices and edges, vertex positions, and vertex appearances.
 
-\code{vg} is intended only for interactive use. 
+\code{vg} is intended primarily for interactive use. 
 When used in a non-interactive environment
-it immediately exits returning the value \code{NULL}.
-Otherwise, it returns a list of functions that 
-specify and query the graph, and control the viewer.
+it will run without a visible GUI, however, a graph structure can be
+created and saved and viewed in future, interactive, R sessions.
 }
 \section{Interactive mouse, key and slide bar controls}{
 
@@ -343,94 +345,89 @@ degrees anticlockwise relative to the canvas orientation.
 \examples{
 
 # Start the viewer.
+# This will print a warning message if not run interactively.
 require(rviewgraph)
 v = vg()
 
-# Check that the viewer was made. 
-# Not usually necessary in interactive mode.
-if (!is.null(v))
-{
-	# Generate some random vertices to connect with edges.
-	from = sample(1:20,15,TRUE)
-	to = sample(1:20,15,TRUE)
+# Generate some random vertices to connect with edges.
+from = sample(1:20,15,TRUE)
+to = sample(1:20,15,TRUE)
 
-	# Connect these edges in the viewer.
-	v$connect(from,to)
+# Connect these edges in the viewer.
+v$connect(from,to)
 
-	# Negative vertex indices are also allowed.
-	v$connect(-from,-to)
+# Negative vertex indices are also allowed.
+v$connect(-from,-to)
 
-	# Add some new vertices, unconnected to any others.
-	v$add(30:35)
+# Add some new vertices, unconnected to any others.
+v$add(30:35)
 
-	# Remove some vertices.
-	v$rem((-5:5)*2)
+# Remove some vertices.
+v$rem((-5:5)*2)
 
-	# Query some of the structure of the graph.
-	v$contains(1)
-	v$contains(-1)
-	v$connects(1,-1)
-	v$contains(1:50)
-	v$connects(from,to)
-	v$connects(from,-to+2)
+# Query some of the structure of the graph.
+v$contains(1)
+v$contains(-1)
+v$connects(1,-1)
+v$contains(1:50)
+v$connects(from,to)
+v$connects(from,-to+2)
 v$neighbours(from)
 
-	# Change what some of the vertices look like.
-	v$map(-10:10, lab = "", col=1, shp=1, width=1:15)
-	v$label(10:36, lab=LETTERS)
-	v$colour((-1000:-1),"cyan")
-	v$shape((-1000:-1)*2,2)
+# Change what some of the vertices look like.
+v$map(-10:10, lab = "", col=1, shp=1, width=1:15)
+v$label(10:36, lab=LETTERS)
+v$colour((-1000:-1),"cyan")
+v$shape((-1000:-1)*2,2)
 
-	# Hide the axes.
-	v$hideAxes()
+# Hide the axes.
+v$hideAxes()
 
-	# Stop the animation. 
-	# Not necessary for outputting but sometimes helpful.
-	v$stop()
+# Stop the animation. 
+# Not necessary for outputting but sometimes helpful.
+v$stop()
 
-	# Change the paper size and orientation to A4 portrait.
-	v$showPaper("A4",F)
+# Change the paper size and orientation to A4 portrait.
+v$showPaper("A4",FALSE)
 
-	# Start the print dialog box.
-	v$ps()
+# Start the print dialog box.
+#v$ps()
 
-	# Restart the animation, and check that it's running.
-	v$run()
-	v$isRunning()
+# Restart the animation, and check that it's running.
+v$run()
+v$isRunning()
 
-	# Save the application.
-	s = v$save()
+# Save the application.
+s = v$save()
 
-	# Change the graph and appearance.
-	v$colour(-1000:1000,"red")
-	v$connect(rep(1,100),1:100)
+# Change the graph and appearance.
+v$colour(-1000:1000,"red")
+v$connect(rep(1,100),1:100)
 
-	# Then decide you didn't like the changes so restore 
-	# the saved state.
-	v$restore(s)
+# Then decide you didn't like the changes so restore 
+# the saved state.
+v$restore(s)
 
-	# Can also restore a state in a new GUI.
-	v2 = vg(s)
+# Can also restore a state in a new GUI.
+v2 = vg(s)
 
-	# Get a vector of all the indices that the viewer has seen.
-	ids = v$getIds()
+# Get a vector of all the indices that the viewer has seen.
+ids = v$getIds()
 
-	# Get a vector of the indices of the vertices currently 
-	# in the graph.
-	verts = v$getVertices()
+# Get a vector of the indices of the vertices currently 
+# in the graph.
+verts = v$getVertices()
 
-	# Get a matrix with 2 columns specifying the current edges 
-	# of the graph.
-	edges = v$getEdges()
+# Get a matrix with 2 columns specifying the current edges 
+# of the graph.
+edges = v$getEdges()
 
-	# Get the current coordinates of the specified vertices. 
-	x = v$getX(verts)
-	y = v$getY(verts)
+# Get the current coordinates of the specified vertices. 
+x = v$getX(verts)
+y = v$getY(verts)
 
-	# Change the current coordinates of the vertices.
-	v$setXY(verts,2*x,0.5*y+2)
-
-}
+# Change the current coordinates of the vertices.
+v$setXY(verts,2*x,0.5*y+2)
 
 
 }

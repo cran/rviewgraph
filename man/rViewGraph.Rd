@@ -221,6 +221,8 @@ degrees anticlockwise relative to the canvas orientation.
 
 \examples{
 
+require(rviewgraph)
+
 # First generate the random edges of an Erdos Renyi random graph.
 f = sample(100,size=200,replace=TRUE)
 t = sample(100,size=200,replace=TRUE)

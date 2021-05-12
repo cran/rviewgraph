@@ -1,0 +1,21 @@
+
+---
+title: "Building a simple graph sampler"
+author: "Alun Thomas"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+ %\VignetteIndexEntry{Building a simple graph sampler}
+ %\VignetteEngine{knitr::rmarkdown}
+ \usepackage[utf8]{inputenc}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r child = "chunks/graphsampler.Rmd"}
+```

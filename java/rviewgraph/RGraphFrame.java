@@ -14,6 +14,17 @@ import java.awt.event.WindowEvent;
 
 public class RGraphFrame extends Frame implements WindowListener
 {
+	public RGraphFrame()
+	{
+	}
+
+	public RGraphFrame(PaintableGraph<Integer,Object> g, boolean d, boolean r, int w, int h)
+	{
+		setGraph(g,d,r);
+		getCanvas().setSize(40+w,40+h);
+		pack();
+	}
+
 	public void setGraph(PaintableGraph<Integer,Object> g, boolean d, boolean r)
 	{
 		running = r;
