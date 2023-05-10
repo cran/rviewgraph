@@ -1,8 +1,8 @@
 Package: rviewgraph
 Type: Package
 Title: Animated Graph Layout Viewer
-Version: 1.4.1
-Date: 2021-05-12
+Version: 1.4.2
+Date: 2023-04-25
 Author: Alun Thomas
 Maintainer: Alun Thomas <Alun.Thomas@utah.edu>
 Description: Provides 'Java' graphical user interfaces 
@@ -11,14 +11,14 @@ Description: Provides 'Java' graphical user interfaces
 Suggests: knitr, rmarkdown
 Enhances: igraph, Matrix
 Depends: rJava
-SystemRequirements: 'Java' version >= 8
+SystemRequirements: Java (>= 8)
 License: GPL-2
 LazyLoad: yes
-Packaged: 2021-05-12 16:21:47 UTC; alun
+Packaged: 2023-05-10 17:35:48 UTC; alun
 Collate: 'onLoad.R' 'rviewgraph-package.R' 'rViewGraph.R' 'vg.R'
 Encoding: UTF-8
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 VignetteBuilder: knitr
 NeedsCompilation: no
 Repository: CRAN
-Date/Publication: 2021-05-12 16:40:03 UTC
+Date/Publication: 2023-05-10 17:50:02 UTC

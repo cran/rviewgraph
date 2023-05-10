@@ -45,6 +45,14 @@ public interface MutableGraph<V,E> extends Graph<V,E>
 	public boolean disconnect(Object u, Object v);
 
 /**
+	Removes all the edges adjacent to the given vertex.
+	Returns true if the graph changed as a result of the call.
+	It is up to the implementation to decide whether to 
+	remove all edges, all in edges, all out edges or etc.
+*/
+//	public boolean disconnect(Object u);
+
+/**
 	Makes a connection between the given vertices in the graph,
 	and associates the given edge with this connection.
 	Returns true if the graph changed as a result of the call.

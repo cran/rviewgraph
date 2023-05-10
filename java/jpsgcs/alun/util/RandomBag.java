@@ -16,11 +16,14 @@ public interface RandomBag<V> extends Collection<V>
  of the bag.
  Returns null if the bag is empty.
 */
-	public V next();
+	public V sample();
 
 /**
  Selects and removes a random element from the bag.
  Returns null if the bag is empty.
 */
-	public V draw();
+	default public V draw()
+	{
+		throw new UnsupportedOperationException();
+	}
 }

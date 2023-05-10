@@ -9,7 +9,7 @@ import jpsgcs.alun.util.RandomBag;
 
 public class RandomSet<E> implements Set<E>, RandomBag<E> 
 {
-	public static boolean wantReproducibleRandoms = true;
+	public static boolean wantReproducibleRandoms = false;
 
 	public RandomSet(Random r)
 	{
@@ -25,7 +25,7 @@ public class RandomSet<E> implements Set<E>, RandomBag<E>
 
 // Random bag interface.
 
-	public E next()
+	public E sample()
 	{
 		//Map.Entry<E,E> x = map.randomLinkedEntry(rand);
 		//Map.Entry<E,E> x = map.randomHashedEntry(rand);
@@ -35,7 +35,7 @@ public class RandomSet<E> implements Set<E>, RandomBag<E>
 
 	public E draw()
 	{
-		E x = next();
+		E x = sample();
 		remove(x);
 		return x;
 	}

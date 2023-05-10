@@ -64,10 +64,12 @@ public abstract class GraphSkeleton<V,E>
                         return outNeighbours(x);
 
                 Set<V> n = new LinkedHashSet<V>();
-		if (inNeighbours(x) != null)
-                	n.addAll(inNeighbours(x));
-		if (outNeighbours(x) != null)
-                	n.addAll(outNeighbours(x));
+		Set<V> s = inNeighbours(x);
+		if (s != null)
+                	n.addAll(s);
+		s = outNeighbours(x);
+		if (s != null)
+                	n.addAll(s);
                 return n;
         }
 
@@ -139,6 +141,38 @@ public abstract class GraphSkeleton<V,E>
 		return true;
 	}
 
+	public boolean disconnect(Object x)
+	{
+		if (!contains(x))
+			return false;
+
+		for (V y : f.get(x).keySet())
+			if (y != x)
+				b.get(y).remove(x);
+		f.get(x).clear();
+
+		if (b != f)
+		{
+			for (V y : b.get(x).keySet())
+				if (y != x)
+					f.get(y).remove(x);
+			b.get(x).clear();
+		}
+
+		return true;
+	}
+
+	public boolean disconnect(Object x, Object y)
+	{
+		if (!contains(x) || !contains(y) || !connects(x,y))
+			return false;
+
+		f.get(x).remove(y);
+		b.get(y).remove(x);
+
+		return true;
+	}
+
         public boolean connect(V x, V y)
         {
                 if (connects(x,y))
@@ -153,17 +187,6 @@ public abstract class GraphSkeleton<V,E>
                 b.get(y).put(x,null);
 
                 return true;
-	}
-
-	public boolean disconnect(Object x, Object y)
-	{
-		if (!contains(x) || !contains(y) || !connects(x,y))
-			return false;
-
-		f.get(x).remove(y);
-		b.get(y).remove(x);
-
-		return true;
 	}
 
         public boolean connect(V x, V y, E e)

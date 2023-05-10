@@ -110,7 +110,7 @@ public class PaintableGraph<V,E> extends LocatedMaskedGraph<V,E> implements Pain
 			{
 				VertexRepresentation nv = getRepresentation(v);
 			//	nv.paint(g,pv.x,pv.y, getNeighbours(v).containsAll(completeGraph().getNeighbours(v)));
-				Collection<V> nall = completeGraph().getNeighbours(v);
+				Collection<? extends V> nall = completeGraph().getNeighbours(v);
 				Collection<V> nshow = getNeighbours(v);
 				boolean comp = true;
 				if (nall != null && nshow != null)

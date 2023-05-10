@@ -242,6 +242,11 @@ public class InputFormatter
 			return "";
 	}
 
+	public int lineLength()
+	{
+		return thisline.length();
+	}
+
 	public String thisLine()
 	{
 		return thisline;

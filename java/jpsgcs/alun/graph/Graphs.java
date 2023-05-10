@@ -275,8 +275,9 @@ public class Graphs
 		return triangulate(g,peel);
 	}
 
-	static public <V,E> List<V> triangulate(MutableGraph<V,E> g, Collection<V> peel)
+	static public <V,E> List<V> triangulate(MutableGraph<V,E> g, Collection<V> p)
 	{
+		Collection<V> peel = new LinkedHashSet<V>(p);
 		List<V> sequence = new ArrayList<V>();
 
 		Network<V,E> h = new Network<V,E>();

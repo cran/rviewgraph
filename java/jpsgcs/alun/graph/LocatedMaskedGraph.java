@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.Map;
 import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
+import java.util.NoSuchElementException;
 import java.util.ConcurrentModificationException;
 
 public class LocatedMaskedGraph<V,E> implements MaskedGraph<V,E>, LocatedGraph<V,E>
@@ -148,13 +149,18 @@ public class LocatedMaskedGraph<V,E> implements MaskedGraph<V,E>, LocatedGraph<V
 		return !hide.contains(x) ? g.connections(x) : null ;
 	}
 
-	public Set<V> getVertices()
+	public Collection<V> getVertices()
 	{
 		try
 		{
 			Set<V> v = new LinkedHashSet<V>(g.getVertices());
 			v.removeAll(hide);
 			return v;
+		}
+		catch (NoSuchElementException e)
+		{
+		//	System.err.println("Caught in LocatedMaskedGraph.getVertices()");
+			return null;
 		}
 		catch (ConcurrentModificationException e)
 		{
@@ -168,9 +174,14 @@ public class LocatedMaskedGraph<V,E> implements MaskedGraph<V,E>, LocatedGraph<V
 		try
 		{
 			Collection<V> n = new LinkedHashSet<V>();
-			Collection<V> h = g.getNeighbours(x);
+			Collection<? extends V> h = g.getNeighbours(x);
 			if (h != null)
-				n.addAll(h);
+			{
+				for (V z : h)
+					if (z != null)
+						n.add(z);
+				//n.addAll(h);
+			}
 			n.removeAll(hide);
 			return n;
 		}
@@ -185,7 +196,7 @@ public class LocatedMaskedGraph<V,E> implements MaskedGraph<V,E>, LocatedGraph<V
 	{
 		//Collection<V> n = new LinkedHashSet<V>(g.inNeighbours(x));
 		Collection<V> n = new LinkedHashSet<V>();
-		Collection<V> h = g.inNeighbours(x);
+		Collection<? extends V> h = g.inNeighbours(x);
 		if (h != null)
 			n.addAll(h);
 		n.removeAll(hide);
@@ -196,7 +207,7 @@ public class LocatedMaskedGraph<V,E> implements MaskedGraph<V,E>, LocatedGraph<V
 	{
 		//Collection<V> n = new LinkedHashSet<V>(g.outNeighbours(x));
 		Collection<V> n = new LinkedHashSet<V>();
-		Collection<V> h = g.outNeighbours(x);
+		Collection<? extends V> h = g.outNeighbours(x);
 		if (h != null)
 			n.addAll(h);
 		n.removeAll(hide);

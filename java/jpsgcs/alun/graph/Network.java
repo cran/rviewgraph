@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.TreeMap;
 import java.util.LinkedHashSet;
+import java.util.Iterator;
 
 /**
 	This is a basic, but useful, implementation of a graph
@@ -92,7 +93,12 @@ public class Network<V,E> extends GraphSkeleton<V,E> implements MutableGraph<V,E
 
 	public V firstNeighbour(V x)
 	{
-		return outNeighbours(x).iterator().next();
+		Set<V> n = outNeighbours(x);
+		if (n == null)
+			return null;
+		Iterator<V> i = n.iterator();
+		return i.hasNext() ? i.next() : null;
+		//return outNeighbours(x).iterator().next();
 	}
 
 /*

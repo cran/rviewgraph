@@ -45,7 +45,8 @@ public interface Graph<V,E>
 /**
 	Returns the set of vertices of the graph.
 */
-	public Set<V> getVertices();
+//	public Set<V> getVertices();
+	public Collection<V> getVertices();
 
 /**
 	Returns the collection of objects adjacent to the given one.

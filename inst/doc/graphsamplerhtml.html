@@ -12,10 +12,23 @@
 
 <meta name="author" content="Alun Thomas" />
 
-<meta name="date" content="2021-05-12" />
+<meta name="date" content="2023-05-10" />
 
 <title>Building a simple graph sampler</title>
 
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
 
 <style type="text/css">
   code{white-space: pre-wrap;}
@@ -27,6 +40,7 @@
     </style>
 
 
+
 <style type="text/css">
   code {
     white-space: pre;
@@ -36,28 +50,28 @@
   }
 </style>
 <style type="text/css" data-origin="pandoc">
-a.sourceLine { display: inline-block; line-height: 1.25; }
-a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
-a.sourceLine:empty { height: 1.2em; position: absolute; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
-code.sourceCode { white-space: pre; position: relative; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
 div.sourceCode { margin: 1em 0; }
 pre.sourceCode { margin: 0; }
 @media screen {
 div.sourceCode { overflow: auto; }
 }
 @media print {
-code.sourceCode { white-space: pre-wrap; }
-a.sourceLine { text-indent: -1em; padding-left: 1em; }
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
-pre.numberSource a.sourceLine
-  { position: relative; }
-pre.numberSource a.sourceLine:empty
-  { position: absolute; }
-pre.numberSource a.sourceLine::before
-  { content: attr(data-line-number);
-    position: absolute; left: -5em; text-align: right; vertical-align: baseline;
-    border: none; pointer-events: all;
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
     -webkit-touch-callout: none; -webkit-user-select: none;
     -khtml-user-select: none; -moz-user-select: none;
     -ms-user-select: none; user-select: none;
@@ -66,15 +80,15 @@ pre.numberSource a.sourceLine::before
   }
 pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
 div.sourceCode
-  {  }
+  {   }
 @media screen {
-a.sourceLine::before { text-decoration: underline; }
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 code span.al { color: #ff0000; font-weight: bold; } /* Alert */
 code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
 code span.at { color: #7d9029; } /* Attribute */
 code span.bn { color: #40a070; } /* BaseN */
-code span.bu { } /* BuiltIn */
+code span.bu { color: #008000; } /* BuiltIn */
 code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
 code span.ch { color: #4070a0; } /* Char */
 code span.cn { color: #880000; } /* Constant */
@@ -87,7 +101,7 @@ code span.er { color: #ff0000; font-weight: bold; } /* Error */
 code span.ex { } /* Extension */
 code span.fl { color: #40a070; } /* Float */
 code span.fu { color: #06287e; } /* Function */
-code span.im { } /* Import */
+code span.im { color: #008000; font-weight: bold; } /* Import */
 code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
 code span.kw { color: #007020; font-weight: bold; } /* Keyword */
 code span.op { color: #666666; } /* Operator */
@@ -108,13 +122,20 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   for (var i = 0; i < sheets.length; i++) {
     if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
     try { var rules = sheets[i].cssRules; } catch (e) { continue; }
-    for (var j = 0; j < rules.length; j++) {
+    var j = 0;
+    while (j < rules.length) {
       var rule = rules[j];
       // check if there is a div.sourceCode rule
-      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
       var style = rule.style.cssText;
       // check if color or background-color is set
-      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
       // replace div.sourceCode by a pre.sourceCode rule
       sheets[i].deleteRule(j);
       sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
@@ -320,141 +341,193 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Building a simple graph sampler</h1>
 <h4 class="author">Alun Thomas</h4>
-<h4 class="date">2021-05-12</h4>
+<h4 class="date">2023-05-10</h4>
 
 
 
 <div id="introduction" class="section level1">
 <h1>Introduction</h1>
-<p>The <code>rviewgraph</code> package provides functions for creating, changing, and viewing a graph. It originally contained only one function called <code>rViewGraph()</code> that allowed viewing a fixed graph using an animated graphical user interface (GUI). A newer function called ’vg()` is now available and allows for viewing a graph the structure of which can change dynamically. To illustrate this we will implement a simple Markov chain Monte Carlo (MCMC) sampler with a given target distribution.</p>
+<p>The <code>rviewgraph</code> package provides functions for creating,
+changing, and viewing a graph. It originally contained only one function
+called <code>rViewGraph()</code> that allowed viewing a fixed graph
+using an animated graphical user interface (GUI). A newer function
+called ’vg()` is now available and allows for viewing a graph the
+structure of which can change dynamically. To illustrate this we will
+implement a simple Markov chain Monte Carlo (MCMC) sampler with a given
+target distribution.</p>
 </div>
 <div id="creating-the-graph-viewer" class="section level1">
 <h1>Creating the graph viewer</h1>
-<p>First ensure that <code>rviewgraph</code> is available, and attempt to start both an old version of the GUI using <code>rViewGraph()</code>, and new version of the GUI using <code>vg()</code>. For the old version we need to specify a graph in advance so we generate some random edge end points.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw">library</span>(rviewgraph)</a>
-<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="co">#&gt; Loading required package: rJava</span></a>
-<a class="sourceLine" id="cb1-3" data-line-number="3"></a>
-<a class="sourceLine" id="cb1-4" data-line-number="4">oldgui =<span class="st"> </span><span class="kw">rViewGraph</span>(<span class="kw">sample</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>,<span class="dv">10</span>,<span class="ot">TRUE</span>),<span class="kw">sample</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>,<span class="dv">10</span>,<span class="ot">TRUE</span>))</a>
-<a class="sourceLine" id="cb1-5" data-line-number="5"><span class="co">#&gt; [1] &quot;rViewGraph only runs in interactive mode.&quot;</span></a>
-<a class="sourceLine" id="cb1-6" data-line-number="6"><span class="kw">is.null</span>(oldgui)</a>
-<a class="sourceLine" id="cb1-7" data-line-number="7"><span class="co">#&gt; [1] TRUE</span></a>
-<a class="sourceLine" id="cb1-8" data-line-number="8"><span class="cf">if</span> (<span class="kw">interactive</span>() <span class="op">&amp;&amp;</span><span class="st"> </span><span class="op">!</span><span class="kw">is.null</span>(oldgui))</a>
-<a class="sourceLine" id="cb1-9" data-line-number="9">{</a>
-<a class="sourceLine" id="cb1-10" data-line-number="10">    <span class="kw">oldgui.stop</span>()</a>
-<a class="sourceLine" id="cb1-11" data-line-number="11">    <span class="kw">oldgui.hide</span>()</a>
-<a class="sourceLine" id="cb1-12" data-line-number="12">}</a>
-<a class="sourceLine" id="cb1-13" data-line-number="13"></a>
-<a class="sourceLine" id="cb1-14" data-line-number="14">v =<span class="st"> </span><span class="kw">vg</span>()</a>
-<a class="sourceLine" id="cb1-15" data-line-number="15"><span class="co">#&gt; [1] &quot;Running without a visible GUI.&quot;</span></a>
-<a class="sourceLine" id="cb1-16" data-line-number="16"><span class="kw">is.null</span>(v)</a>
-<a class="sourceLine" id="cb1-17" data-line-number="17"><span class="co">#&gt; [1] FALSE</span></a></code></pre></div>
-<p>We see that <code>rViewGraph()</code> returns <code>NULL</code> and prints an error message. This is because the old programs can only be run in interactive mode. The new version, <code>vg()</code>, however, will return a list of functions that can be run non-interactively, but, of course, without a visible GUI. As this vignette was produced non-interactively, there is no GUI, but if you are replicating it from a live <code>R</code> session you should see a new <code>Java</code> window that has appeared with a blank canvas on which the graph will be viewed. There will also be a GUI showing the random graph generated in the call to <code>rViewGraph()</code>, so we remove that.</p>
-<p>The returned value <code>v</code> is a list of functions that we will use to display the graph as we run the sampler.</p>
+<p>First ensure that <code>rviewgraph</code> is available, and attempt
+to start both an old version of the GUI using <code>rViewGraph()</code>,
+and new version of the GUI using <code>vg()</code>. For the old version
+we need to specify a graph in advance so we generate some random edge
+end points.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rviewgraph)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Loading required package: rJava</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>oldgui <span class="ot">=</span> <span class="fu">rViewGraph</span>(<span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>,<span class="dv">10</span>,<span class="cn">TRUE</span>),<span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>,<span class="dv">10</span>,<span class="cn">TRUE</span>))</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;rViewGraph only runs in interactive mode.&quot;</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">is.null</span>(oldgui)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] TRUE</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">interactive</span>() <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(oldgui))</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">oldgui.stop</span>()</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">oldgui.hide</span>()</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>v <span class="ot">=</span> <span class="fu">vg</span>()</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Running without a visible GUI.&quot;</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="fu">is.null</span>(v)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] FALSE</span></span></code></pre></div>
+<p>We see that <code>rViewGraph()</code> returns <code>NULL</code> and
+prints an error message. This is because the old programs can only be
+run in interactive mode. The new version, <code>vg()</code>, however,
+will return a list of functions that can be run non-interactively, but,
+of course, without a visible GUI. As this vignette was produced
+non-interactively, there is no GUI, but if you are replicating it from a
+live <code>R</code> session you should see a new <code>Java</code>
+window that has appeared with a blank canvas on which the graph will be
+viewed. There will also be a GUI showing the random graph generated in
+the call to <code>rViewGraph()</code>, so we remove that.</p>
+<p>The returned value <code>v</code> is a list of functions that we will
+use to display the graph as we run the sampler.</p>
 </div>
 <div id="defining-the-elements-of-the-sampler" class="section level1">
 <h1>Defining the elements of the sampler</h1>
-<p>First we define a probability mass function on graphs, in fact we need only specify this up to a constant of proportionality. This simple example depends only on the number of edges in the graph, and as such it would be more efficient to track this count as we iterate through the MCMC scheme, however, this will illustrate how the structure of the graph can be queried, and also makes the MCMC scheme more easily adapted to different probability distributions. For numerical stability, we work with logs of probabilities.</p>
-<p>This probability distribution favours more sparsely edged graphs if we set <code>a &gt; 0</code>, and more densely edged ones if <code>a &lt; 0</code>. We can query the graph for a two dimensional array that specifies the edges. Because this graph is undirected, each edge is returned twice, once in each direction, so we divide to get the number of edges.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1">edges =<span class="st"> </span><span class="cf">function</span>(g)</a>
-<a class="sourceLine" id="cb2-2" data-line-number="2">{</a>
-<a class="sourceLine" id="cb2-3" data-line-number="3">    <span class="kw">dim</span>(g<span class="op">$</span><span class="kw">getEdges</span>())[<span class="dv">1</span>] <span class="op">/</span><span class="st"> </span><span class="dv">2</span></a>
-<a class="sourceLine" id="cb2-4" data-line-number="4">}</a>
-<a class="sourceLine" id="cb2-5" data-line-number="5"></a>
-<a class="sourceLine" id="cb2-6" data-line-number="6">logProb =<span class="st"> </span><span class="cf">function</span>(g,a)</a>
-<a class="sourceLine" id="cb2-7" data-line-number="7">{</a>
-<a class="sourceLine" id="cb2-8" data-line-number="8">    <span class="op">-</span><span class="kw">edges</span>(g)<span class="op">*</span>a</a>
-<a class="sourceLine" id="cb2-9" data-line-number="9">}</a></code></pre></div>
-<p>Here is a function that flips an edge in a graph. That is, if a pair of vertices are connected it disconnects them, if disconnected, it connects them. This will be our Metropolis proposal scheme, and it is reversible. The argument <code>g</code> is assumed to be a list that was returned by calling <code>vg()</code>.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1">flip =<span class="st"> </span><span class="cf">function</span>(g,x,y)</a>
-<a class="sourceLine" id="cb3-2" data-line-number="2">{</a>
-<a class="sourceLine" id="cb3-3" data-line-number="3">    <span class="cf">if</span> (g<span class="op">$</span><span class="kw">connects</span>(x,y))</a>
-<a class="sourceLine" id="cb3-4" data-line-number="4">        g<span class="op">$</span><span class="kw">disconnect</span>(x,y)</a>
-<a class="sourceLine" id="cb3-5" data-line-number="5">    <span class="cf">else</span></a>
-<a class="sourceLine" id="cb3-6" data-line-number="6">        g<span class="op">$</span><span class="kw">connect</span>(x,y)</a>
-<a class="sourceLine" id="cb3-7" data-line-number="7">}</a></code></pre></div>
-<p>Now we define a Metropolis MCMC proposal and acceptance step. The calls to <code>Sys.sleep()</code> just slow the process down to make the process easier to follow in the viewer when used interactively. The colour changes will show the proposals being made.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1">step =<span class="st"> </span><span class="cf">function</span>(g, a, <span class="dt">t =</span> <span class="dv">1</span>)</a>
-<a class="sourceLine" id="cb4-2" data-line-number="2">{</a>
-<a class="sourceLine" id="cb4-3" data-line-number="3">    <span class="co"># Find the probability of the current graph.</span></a>
-<a class="sourceLine" id="cb4-4" data-line-number="4">    delta =<span class="st"> </span><span class="kw">logProb</span>(g,a)</a>
-<a class="sourceLine" id="cb4-5" data-line-number="5"></a>
-<a class="sourceLine" id="cb4-6" data-line-number="6">    <span class="co"># Choose a pair of random vertices to flip, and display them.</span></a>
-<a class="sourceLine" id="cb4-7" data-line-number="7">    x =<span class="st"> </span><span class="kw">sample</span>(g<span class="op">$</span><span class="kw">getVertices</span>(),<span class="dv">2</span>,<span class="dt">replace=</span><span class="ot">FALSE</span>)</a>
-<a class="sourceLine" id="cb4-8" data-line-number="8">    g<span class="op">$</span><span class="kw">colour</span>(x,<span class="st">&quot;red&quot;</span>)</a>
-<a class="sourceLine" id="cb4-9" data-line-number="9">    <span class="kw">Sys.sleep</span>(t<span class="op">/</span><span class="dv">3</span>)</a>
-<a class="sourceLine" id="cb4-10" data-line-number="10">    </a>
-<a class="sourceLine" id="cb4-11" data-line-number="11">    <span class="co"># Then make the flip.</span></a>
-<a class="sourceLine" id="cb4-12" data-line-number="12">    <span class="kw">flip</span>(g,x[<span class="dv">1</span>],x[<span class="dv">2</span>])</a>
-<a class="sourceLine" id="cb4-13" data-line-number="13">    <span class="kw">Sys.sleep</span>(t<span class="op">/</span><span class="dv">3</span>)</a>
-<a class="sourceLine" id="cb4-14" data-line-number="14"></a>
-<a class="sourceLine" id="cb4-15" data-line-number="15">    <span class="co"># Find the ratio of the probabilities of the proposed new graph</span></a>
-<a class="sourceLine" id="cb4-16" data-line-number="16">    <span class="co"># and the previous incumbent.</span></a>
-<a class="sourceLine" id="cb4-17" data-line-number="17">    delta =<span class="st"> </span><span class="kw">logProb</span>(g,a) <span class="op">-</span><span class="st"> </span>delta</a>
-<a class="sourceLine" id="cb4-18" data-line-number="18"></a>
-<a class="sourceLine" id="cb4-19" data-line-number="19">    <span class="co"># Then with probability equal to the minimum of 1 and this ratio </span></a>
-<a class="sourceLine" id="cb4-20" data-line-number="20">    <span class="co"># accept the new graph by doing nothing, otherwise reject it by </span></a>
-<a class="sourceLine" id="cb4-21" data-line-number="21">    <span class="co"># undoing the flip.</span></a>
-<a class="sourceLine" id="cb4-22" data-line-number="22">    <span class="cf">if</span> (<span class="kw">log</span>(<span class="kw">runif</span>(<span class="dv">1</span>)) <span class="op">&gt;</span><span class="st"> </span>delta)</a>
-<a class="sourceLine" id="cb4-23" data-line-number="23">        <span class="kw">flip</span>(g,x[<span class="dv">1</span>],x[<span class="dv">2</span>])</a>
-<a class="sourceLine" id="cb4-24" data-line-number="24"></a>
-<a class="sourceLine" id="cb4-25" data-line-number="25">    <span class="co"># Reset the colours, and pause before the next step.</span></a>
-<a class="sourceLine" id="cb4-26" data-line-number="26">    g<span class="op">$</span><span class="kw">colour</span>(x)</a>
-<a class="sourceLine" id="cb4-27" data-line-number="27">    <span class="kw">Sys.sleep</span>(t<span class="op">/</span><span class="dv">3</span>)</a>
-<a class="sourceLine" id="cb4-28" data-line-number="28">}</a></code></pre></div>
+<p>First we define a probability mass function on graphs, in fact we
+need only specify this up to a constant of proportionality. This simple
+example depends only on the number of edges in the graph, and as such it
+would be more efficient to track this count as we iterate through the
+MCMC scheme, however, this will illustrate how the structure of the
+graph can be queried, and also makes the MCMC scheme more easily adapted
+to different probability distributions. For numerical stability, we work
+with logs of probabilities.</p>
+<p>This probability distribution favours more sparsely edged graphs if
+we set <code>a &gt; 0</code>, and more densely edged ones if
+<code>a &lt; 0</code>. We can query the graph for a two dimensional
+array that specifies the edges. Because this graph is undirected, each
+edge is returned twice, once in each direction, so we divide to get the
+number of edges.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>edges <span class="ot">=</span> <span class="cf">function</span>(g)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">dim</span>(g<span class="sc">$</span><span class="fu">getEdges</span>())[<span class="dv">1</span>] <span class="sc">/</span> <span class="dv">2</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>logProb <span class="ot">=</span> <span class="cf">function</span>(g,a)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="sc">-</span><span class="fu">edges</span>(g)<span class="sc">*</span>a</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>Here is a function that flips an edge in a graph. That is, if a pair
+of vertices are connected it disconnects them, if disconnected, it
+connects them. This will be our Metropolis proposal scheme, and it is
+reversible. The argument <code>g</code> is assumed to be a list that was
+returned by calling <code>vg()</code>.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>flip <span class="ot">=</span> <span class="cf">function</span>(g,x,y)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (g<span class="sc">$</span><span class="fu">connects</span>(x,y))</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        g<span class="sc">$</span><span class="fu">disconnect</span>(x,y)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>        g<span class="sc">$</span><span class="fu">connect</span>(x,y)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>Now we define a Metropolis MCMC proposal and acceptance step. The
+calls to <code>Sys.sleep()</code> just slow the process down to make the
+process easier to follow in the viewer when used interactively. The
+colour changes will show the proposals being made.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>step <span class="ot">=</span> <span class="cf">function</span>(g, a, <span class="at">t =</span> <span class="dv">1</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Find the probability of the current graph.</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    delta <span class="ot">=</span> <span class="fu">logProb</span>(g,a)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Choose a pair of random vertices to flip, and display them.</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    x <span class="ot">=</span> <span class="fu">sample</span>(g<span class="sc">$</span><span class="fu">getVertices</span>(),<span class="dv">2</span>,<span class="at">replace=</span><span class="cn">FALSE</span>)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    g<span class="sc">$</span><span class="fu">colour</span>(x,<span class="st">&quot;red&quot;</span>)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Sys.sleep</span>(t<span class="sc">/</span><span class="dv">3</span>)</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Then make the flip.</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">flip</span>(g,x[<span class="dv">1</span>],x[<span class="dv">2</span>])</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Sys.sleep</span>(t<span class="sc">/</span><span class="dv">3</span>)</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Find the ratio of the probabilities of the proposed new graph</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># and the previous incumbent.</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    delta <span class="ot">=</span> <span class="fu">logProb</span>(g,a) <span class="sc">-</span> delta</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Then with probability equal to the minimum of 1 and this ratio </span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    <span class="co"># accept the new graph by doing nothing, otherwise reject it by </span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    <span class="co"># undoing the flip.</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">log</span>(<span class="fu">runif</span>(<span class="dv">1</span>)) <span class="sc">&gt;</span> delta)</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>        <span class="fu">flip</span>(g,x[<span class="dv">1</span>],x[<span class="dv">2</span>])</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Reset the colours, and pause before the next step.</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>    g<span class="sc">$</span><span class="fu">colour</span>(x)</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Sys.sleep</span>(t<span class="sc">/</span><span class="dv">3</span>)</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 </div>
 <div id="the-complete-metropolis-mcmc-scheme" class="section level1">
 <h1>The complete Metropolis MCMC scheme</h1>
-<p>We can now combine these functions to make a complete MCMC scheme using here a graph of <code>n = 20</code> vertices. As an example of an output, we can calculate the mean number of edges over the simulation. If we set the penalty to 0, we get a random walk over graphs of size <code>n</code>, so the simulated mean number of edges should be about <code>n(n-1)/4</code>.</p>
-<p>If this is run in interactive mode, this is primarily to illustrate how the GUI shows the progress of the sampler, so we set the sleep parameter to give one step per second and make 50 updates. If run non-interactively, we don’t need to slow down the sampler to see the progress, so we make more iterations and include a burn in period to allow the sampler to move away from the initial state and obtain better estimates of the mean number of edges.</p>
-<p>The scheme is run using the viewer that was created at the beginning of this vignette.</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1">    <span class="co"># To make the simulation reproducible.</span></a>
-<a class="sourceLine" id="cb5-2" data-line-number="2">    <span class="kw">set.seed</span>(<span class="dv">1</span>)</a>
-<a class="sourceLine" id="cb5-3" data-line-number="3"></a>
-<a class="sourceLine" id="cb5-4" data-line-number="4">    n =<span class="st"> </span><span class="dv">20</span></a>
-<a class="sourceLine" id="cb5-5" data-line-number="5">    v<span class="op">$</span><span class="kw">add</span>(<span class="dv">1</span><span class="op">:</span>n)</a>
-<a class="sourceLine" id="cb5-6" data-line-number="6"></a>
-<a class="sourceLine" id="cb5-7" data-line-number="7">    pen =<span class="st"> </span><span class="dv">0</span></a>
-<a class="sourceLine" id="cb5-8" data-line-number="8"></a>
-<a class="sourceLine" id="cb5-9" data-line-number="9">    <span class="cf">if</span> (<span class="kw">interactive</span>())</a>
-<a class="sourceLine" id="cb5-10" data-line-number="10">    {</a>
-<a class="sourceLine" id="cb5-11" data-line-number="11">        wait =<span class="st"> </span><span class="dv">1</span></a>
-<a class="sourceLine" id="cb5-12" data-line-number="12">        s =<span class="st"> </span><span class="dv">50</span></a>
-<a class="sourceLine" id="cb5-13" data-line-number="13">    } <span class="cf">else</span></a>
-<a class="sourceLine" id="cb5-14" data-line-number="14">    {</a>
-<a class="sourceLine" id="cb5-15" data-line-number="15">        wait =<span class="st"> </span><span class="dv">0</span></a>
-<a class="sourceLine" id="cb5-16" data-line-number="16">        s =<span class="st"> </span><span class="dv">1000</span></a>
-<a class="sourceLine" id="cb5-17" data-line-number="17">        <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>s)</a>
-<a class="sourceLine" id="cb5-18" data-line-number="18">            <span class="kw">step</span>(v,pen,wait)</a>
-<a class="sourceLine" id="cb5-19" data-line-number="19">    }</a>
-<a class="sourceLine" id="cb5-20" data-line-number="20"></a>
-<a class="sourceLine" id="cb5-21" data-line-number="21">    medge =<span class="st"> </span><span class="dv">0</span></a>
-<a class="sourceLine" id="cb5-22" data-line-number="22">    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>s)</a>
-<a class="sourceLine" id="cb5-23" data-line-number="23">    {</a>
-<a class="sourceLine" id="cb5-24" data-line-number="24">        <span class="kw">step</span>(v,pen,wait)</a>
-<a class="sourceLine" id="cb5-25" data-line-number="25">        medge =<span class="st"> </span>medge <span class="op">+</span><span class="st"> </span><span class="kw">edges</span>(v)</a>
-<a class="sourceLine" id="cb5-26" data-line-number="26">    }</a>
-<a class="sourceLine" id="cb5-27" data-line-number="27">    <span class="kw">c</span>(medge<span class="op">/</span>s, n<span class="op">*</span>(n<span class="dv">-1</span>)<span class="op">/</span><span class="dv">4</span>)</a>
-<a class="sourceLine" id="cb5-28" data-line-number="28"><span class="co">#&gt; [1] 98.702 95.000</span></a></code></pre></div>
+<p>We can now combine these functions to make a complete MCMC scheme
+using here a graph of <code>n = 20</code> vertices. As an example of an
+output, we can calculate the mean number of edges over the simulation.
+If we set the penalty to 0, we get a random walk over graphs of size
+<code>n</code>, so the simulated mean number of edges should be about
+<code>n(n-1)/4</code>.</p>
+<p>If this is run in interactive mode, this is primarily to illustrate
+how the GUI shows the progress of the sampler, so we set the sleep
+parameter to give one step per second and make 50 updates. If run
+non-interactively, we don’t need to slow down the sampler to see the
+progress, so we make more iterations and include a burn in period to
+allow the sampler to move away from the initial state and obtain better
+estimates of the mean number of edges.</p>
+<p>The scheme is run using the viewer that was created at the beginning
+of this vignette.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>    <span class="co"># To make the simulation reproducible.</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    n <span class="ot">=</span> <span class="dv">20</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    v<span class="sc">$</span><span class="fu">add</span>(<span class="dv">1</span><span class="sc">:</span>n)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    pen <span class="ot">=</span> <span class="dv">0</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">interactive</span>())</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>        wait <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>        s <span class="ot">=</span> <span class="dv">50</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>        wait <span class="ot">=</span> <span class="dv">0</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>        s <span class="ot">=</span> <span class="dv">1000</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>s)</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>            <span class="fu">step</span>(v,pen,wait)</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    medge <span class="ot">=</span> <span class="dv">0</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>s)</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>        <span class="fu">step</span>(v,pen,wait)</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>        medge <span class="ot">=</span> medge <span class="sc">+</span> <span class="fu">edges</span>(v)</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">c</span>(medge<span class="sc">/</span>s, n<span class="sc">*</span>(n<span class="dv">-1</span>)<span class="sc">/</span><span class="dv">4</span>)</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 98.164 95.000</span></span></code></pre></div>
 <p>A positive penalty should decrease the mean number of edges.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1">    pen =<span class="st"> </span><span class="dv">1</span></a>
-<a class="sourceLine" id="cb6-2" data-line-number="2">    medge =<span class="st"> </span><span class="dv">0</span></a>
-<a class="sourceLine" id="cb6-3" data-line-number="3">    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>s)</a>
-<a class="sourceLine" id="cb6-4" data-line-number="4">    {</a>
-<a class="sourceLine" id="cb6-5" data-line-number="5">        <span class="kw">step</span>(v,pen,wait)</a>
-<a class="sourceLine" id="cb6-6" data-line-number="6">        medge =<span class="st"> </span>medge <span class="op">+</span><span class="st"> </span><span class="kw">edges</span>(v)</a>
-<a class="sourceLine" id="cb6-7" data-line-number="7">    }</a>
-<a class="sourceLine" id="cb6-8" data-line-number="8">    medge<span class="op">/</span>s</a>
-<a class="sourceLine" id="cb6-9" data-line-number="9"><span class="co">#&gt; [1] 56.45</span></a></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>    pen <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    medge <span class="ot">=</span> <span class="dv">0</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>s)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        <span class="fu">step</span>(v,pen,wait)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        medge <span class="ot">=</span> medge <span class="sc">+</span> <span class="fu">edges</span>(v)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    medge<span class="sc">/</span>s</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 58.688</span></span></code></pre></div>
 <p>And a negative one should increase the mean number of edges.</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1">    pen =<span class="st"> </span><span class="dv">-1</span></a>
-<a class="sourceLine" id="cb7-2" data-line-number="2">    medge =<span class="st"> </span><span class="dv">0</span></a>
-<a class="sourceLine" id="cb7-3" data-line-number="3">    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>s)</a>
-<a class="sourceLine" id="cb7-4" data-line-number="4">    {</a>
-<a class="sourceLine" id="cb7-5" data-line-number="5">        <span class="kw">step</span>(v,pen,wait)</a>
-<a class="sourceLine" id="cb7-6" data-line-number="6">        medge =<span class="st"> </span>medge <span class="op">+</span><span class="st"> </span><span class="kw">edges</span>(v)</a>
-<a class="sourceLine" id="cb7-7" data-line-number="7">    }</a>
-<a class="sourceLine" id="cb7-8" data-line-number="8">    medge<span class="op">/</span>s</a>
-<a class="sourceLine" id="cb7-9" data-line-number="9"><span class="co">#&gt; [1] 131.135</span></a></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>    pen <span class="ot">=</span> <span class="sc">-</span><span class="dv">1</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    medge <span class="ot">=</span> <span class="dv">0</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>s)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>        <span class="fu">step</span>(v,pen,wait)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>        medge <span class="ot">=</span> medge <span class="sc">+</span> <span class="fu">edges</span>(v)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    medge<span class="sc">/</span>s</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 127.254</span></span></code></pre></div>
 </div>
 
 

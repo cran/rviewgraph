@@ -25,7 +25,11 @@ public class DAGLocator<V,E> extends GraphLocator<V,E>
 		double beta = d*d*d;
 		double delta = par[2].getValue();
 		
-		Collection<V> vertices = new LinkedHashSet<V>(g.getVertices());
+		// Need to capture current state and check for null because 
+		// of possible modifications by other threads.
+		Collection<V> vertices = g.getVertices();
+		if (vertices == null)
+			return differ;
 
 		RadixPlaneSorter<Coord> p = null;
 		if (alpha > Double.MIN_VALUE)
